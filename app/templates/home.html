@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<p>Know which third-party apps your business uses and which vendor records need attention.</p>
+<div class="cards">
+  <div class="card"><strong>{{ vendor_count }}</strong>Vendors</div>
+  <div class="card"><strong>{{ application_count }}</strong>Applications</div>
+  <div class="card"><strong>{{ unassigned_count }}</strong>Unassigned applications</div>
+</div>
+<p class="note">Placeholder home page. Vendor and application screens come next (issues 6 to 8).</p>
+{% endblock %}

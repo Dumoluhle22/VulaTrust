@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}VulaTrust{% endblock %}</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 52rem; margin: 2rem auto; padding: 0 1rem; color: #1f2933; }
+    nav a { margin-right: 1rem; }
+    .cards { display: flex; gap: 1rem; flex-wrap: wrap; margin: 1.5rem 0; }
+    .card { border: 1px solid #cbd2d9; border-radius: 6px; padding: 1rem 1.5rem; min-width: 10rem; }
+    .card strong { display: block; font-size: 2rem; }
+    .note { color: #52606d; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>VulaTrust</h1>
+    <nav><a href="/">Home</a></nav>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
