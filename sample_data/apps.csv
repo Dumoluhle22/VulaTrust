@@ -1,0 +1,24 @@
+app_name,vendor_domain,source,user_count,scopes,privileged
+PayTrack Payroll,paytrack.example,google,3,payroll read,no
+PayTrack Mobile,PayTrack.example,google,2,profile,no
+ClinicNotes Web,www.clinicnotes.example,google,8,full drive access; calendar,yes
+QuickSign,https://quicksign.example/app,microsoft,6,files read,no
+ChatBridge Desktop,chatbridge.example,google,12,messages,unknown
+Brightlearn LMS,brightlearn.example,microsoft,40,profile read,no
+MailBlast,mailblast.example,google,2,contacts read,no
+DesignHub,designhub.example,csv,9,files read,no
+LedgerLite,ledgerlite.example,microsoft,3,full mailbox access,yes
+ClinicNotes Reports,app.clinicnotes.example,google,1,drive read,no
+DesignHub Plugin,designhub.example,google,2,profile,no
+Mystery PDF Tool,,google,4,files read,unknown
+Quick Notes,quicknotes.example,google,7,docs read,no
+Survey Maker,surveymaker.example,google,5,forms,unknown
+Calendar Sync Pro,calsync.example,microsoft,15,calendar read/write,yes
+=1+1 Report Tool,formulatool.example,csv,1,reports,no
+PayTrack Payroll,paytrack.example,google,3,payroll read,no
+Bad Count App,paytrack.example,google,abc,files read,no
+Negative Count App,paytrack.example,google,-3,files read,no
+Bad Source App,paytrack.example,dropbox,2,files read,no
+Bad Privileged App,paytrack.example,google,2,files read,maybe
+Long Scopes App,paytrack.example,google,2,xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx,no
+,paytrack.example,google,2,files read,no
