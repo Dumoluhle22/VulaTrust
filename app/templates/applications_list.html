@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Applications - VulaTrust{% endblock %}
+{% block content %}
+<h2>Applications</h2>
+{% if message %}<p class="banner">{{ message }}</p>{% endif %}
+<p><a class="button" href="/applications/new">Add application</a> <a class="button plain" href="/applications/unassigned">Unassigned only</a></p>
+{% if applications %}
+<table>
+  <thead>
+    <tr><th>Name</th><th>Vendor</th><th>Source</th><th>Users</th><th>Privileged</th><th>Found</th><th></th></tr>
+  </thead>
+  <tbody>
+  {% for application in applications %}
+    <tr>
+      <td>{{ application.name }}</td>
+      <td>{% if application.vendor %}<a href="/vendors/{{ application.vendor.id }}">{{ application.vendor.name }}</a>{% else %}<strong>Unassigned</strong>{% endif %}</td>
+      <td>{{ application.source|pretty }}</td>
+      <td>{{ application.user_count }}</td>
+      <td>{{ application.privileged|pretty }}</td>
+      <td>{{ application.discovered_at.date().isoformat() }}</td>
+      <td>
+        <a href="/applications/{{ application.id }}/edit">Edit</a> |
+        <a href="/applications/{{ application.id }}/delete">Delete</a>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No applications yet. Add one, or import a CSV once that feature is built.</p>
+{% endif %}
+{% endblock %}

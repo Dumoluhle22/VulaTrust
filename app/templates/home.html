@@ -4,7 +4,8 @@
 <div class="cards">
   <div class="card"><strong>{{ vendor_count }}</strong>Vendors</div>
   <div class="card"><strong>{{ application_count }}</strong>Applications</div>
-  <div class="card"><strong>{{ unassigned_count }}</strong>Unassigned applications</div>
+  <a class="card" href="/applications/unassigned"><strong>{{ unassigned_count }}</strong>Unassigned applications</a>
 </div>
-<p class="note">Placeholder home page. Vendor and application screens come next (issues 6 to 8).</p>
+<p><a class="button" href="/vendors">Manage vendors</a> <a class="button plain" href="/applications">Manage applications</a> <a class="button plain" href="/import">Check a CSV file</a></p>
+<p class="note">Vendor matching and saving imported rows come next (issues 10 and 11).</p>
 {% endblock %}

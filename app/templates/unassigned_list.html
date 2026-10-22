@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Unassigned applications - VulaTrust{% endblock %}
+{% block content %}
+<h2>Unassigned applications</h2>
+<p>Applications with no vendor. Until a vendor is linked, nobody is accountable for them and they cannot be scored.</p>
+{% if applications %}
+<p><strong>{{ applications|length }}</strong> {{ "application needs" if applications|length == 1 else "applications need" }} a vendor.</p>
+<table>
+  <thead>
+    <tr><th>Name</th><th>Source</th><th>Users</th><th>Privileged</th><th>Access</th><th>Found</th><th></th></tr>
+  </thead>
+  <tbody>
+  {% for application in applications %}
+    <tr>
+      <td>{{ application.name }}</td>
+      <td>{{ application.source|pretty }}</td>
+      <td>{{ application.user_count }}</td>
+      <td>{{ application.privileged|pretty }}</td>
+      <td>{% if application.scopes %}{{ application.scopes }}{% else %}<span class="muted">not set</span>{% endif %}</td>
+      <td>{{ application.discovered_at.date().isoformat() }}</td>
+      <td><a class="button plain" href="/applications/{{ application.id }}/edit">Assign vendor</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="banner">Every application is linked to a vendor.</p>
+{% endif %}
+<p><a href="/applications">All applications</a></p>
+{% endblock %}

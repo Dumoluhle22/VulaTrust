@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Check a CSV file - VulaTrust{% endblock %}
+{% block content %}
+<h2>Check a CSV file</h2>
+<p>Upload a list of applications to see whether it can be imported. <strong>This page only checks the file. Nothing is saved.</strong></p>
+
+<form method="post" action="/import" enctype="multipart/form-data">
+  <div class="field">
+    <label for="file">CSV file</label>
+    <input type="file" id="file" name="file" accept=".csv,text/csv">
+    <div class="help">Maximum {{ max_mb }} MB and {{ "{:,}".format(max_rows) }} rows. Save as CSV UTF-8 from Excel.</div>
+  </div>
+  <button class="button" type="submit">Check file</button>
+</form>
+<p class="help">
+  The first row must contain these column names: <code>{{ columns|join(", ") }}</code>.
+  <a href="/import/template.csv">Download a template</a>.
+  Blank source becomes csv, blank privileged becomes unknown, and a blank user count becomes 0.
+</p>
+
+{% if result %}
+  <hr>
+  {% if result.file_error %}
+    <p class="errorbox"><strong>Could not check the file.</strong> {{ result.file_error }}</p>
+  {% else %}
+    <h3>Result for {{ filename }}</h3>
+    <div class="cards">
+      <div class="card"><strong>{{ result.rows_read }}</strong>Rows read</div>
+      <div class="card"><strong>{{ result.valid|length }}</strong>Ready to import</div>
+      <div class="card"><strong>{{ result.duplicates|length }}</strong>Duplicates skipped</div>
+      <div class="card"><strong>{{ result.rejected|length }}</strong>Rejected</div>
+    </div>
+    {% if result.blank_rows %}<p class="note">{{ result.blank_rows }} blank {{ "row was" if result.blank_rows == 1 else "rows were" }} ignored.</p>{% endif %}
+    {% if result.rows_read == 0 %}<p class="warnbox">The file has a header but no data rows.</p>{% endif %}
+
+    {% if result.rejected %}
+    <h3>Rejected rows ({{ result.rejected|length }})</h3>
+    <p class="note">Fix these in your file and check it again. Line numbers count the header as line 1.</p>
+    <table>
+      <thead><tr><th>Line</th><th>App name</th><th>Why it was rejected</th></tr></thead>
+      <tbody>
+      {% for row in result.rejected %}
+        <tr><td>{{ row.line }}</td><td>{% if row.app_name %}{{ row.app_name }}{% else %}<span class="muted">(blank)</span>{% endif %}</td>
+        <td>{% for reason in row.reasons %}{{ reason }}{% if not loop.last %}<br>{% endif %}{% endfor %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+
+    {% if result.duplicates %}
+    <h3>Duplicates skipped ({{ result.duplicates|length }})</h3>
+    <table>
+      <thead><tr><th>Line</th><th>App name</th><th>Same as line</th></tr></thead>
+      <tbody>
+      {% for row in result.duplicates %}
+        <tr><td>{{ row.line }}</td><td>{{ row.app_name }}</td><td>{{ row.first_line }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+
+    {% if result.warnings %}
+    <h3>Warnings ({{ result.warnings|length }})</h3>
+    <table>
+      <thead><tr><th>Line</th><th>Note</th></tr></thead>
+      <tbody>
+      {% for line, text in result.warnings %}
+        <tr><td>{{ line }}</td><td>{{ text }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+
+    {% if preview %}
+    <h3>Ready to import ({{ result.valid|length }})</h3>
+    {% if result.valid|length > preview_rows %}<p class="note">Showing the first {{ preview_rows }}.</p>{% endif %}
+    <table>
+      <thead><tr><th>Line</th><th>App name</th><th>Vendor domain</th><th>Source</th><th>Users</th><th>Privileged</th></tr></thead>
+      <tbody>
+      {% for row in preview %}
+        <tr>
+          <td>{{ row.line }}</td><td>{{ row.app_name }}</td>
+          <td>{% if row.vendor_domain %}{{ row.vendor_domain }}{% else %}<span class="muted">none (unassigned)</span>{% endif %}</td>
+          <td>{{ row.source|pretty }}</td><td>{{ row.user_count }}</td><td>{{ row.privileged|pretty }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+  {% endif %}
+{% endif %}
+{% endblock %}

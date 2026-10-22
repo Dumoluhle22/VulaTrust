@@ -15,11 +15,14 @@ These are proposals for issues 9, 10, 11 and 15. If you decide differently, chan
 
 1. **Domain normalisation:** lowercase, remove `http(s)://`, any path or port, and a leading `www.`.
 2. **Matching:** an app matches a vendor when its domain equals the vendor's domain or is a subdomain of it (`app.clinicnotes.example` matches `clinicnotes.example`). A blank or unknown domain stays unassigned.
-3. **Duplicates:** two rows with the same app name, normalised domain and source count as one application.
-4. **Rejected rows:** blank app name, user count that is not a whole number or is negative, source not in manual/csv/google/microsoft, privileged not yes/no/unknown, scopes over 500 characters.
+3. **Duplicates:** two rows with the same app name (ignoring upper or lower case), normalised domain and source count as one application. Only valid rows can be duplicates.
+4. **Rejected rows:** blank app name, user count that is not a whole number, is negative or is over 1,000,000, source not in manual/csv/google/microsoft, privileged not yes/no/unknown, scopes over 500 characters, app name over 200 characters, or a row with a different number of cells from the header. Every problem in a row is reported, not just the first.
 5. **Formula safety:** a cell starting with `=`, `+`, `-` or `@` is accepted but prefixed with an apostrophe so a spreadsheet will not run it.
 6. **Vendor-level inputs:** users are the **sum** across the vendor's applications. Privileged is **yes** if any application is yes, otherwise **unknown** if any is unknown.
 7. **Unknown inputs** add half a factor's points. The total is rounded half up to a whole number at the end.
+8. **Blank cells:** a blank source becomes `csv`, a blank privileged becomes `unknown` (never `no`), and a blank user count becomes 0. Source and privileged are accepted in any letter case.
+9. **Invalid domain:** a domain that is filled in but not valid does not reject the row. The application is kept, left unassigned, and a warning is shown.
+10. **File rules (issue 9):** `.csv` only, UTF-8 text (Excel's BOM is fine), at most 1 MB and 5,000 rows, comma or semicolon separated. The first row must hold the six column names in any order and any letter case, and extra columns are ignored. Line numbers count the header as line 1.
 
 ## Expected import result for `apps.csv`
 

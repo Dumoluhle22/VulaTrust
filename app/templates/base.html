@@ -5,18 +5,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}VulaTrust{% endblock %}</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 52rem; margin: 2rem auto; padding: 0 1rem; color: #1f2933; }
+    body { font-family: system-ui, sans-serif; max-width: 62rem; margin: 2rem auto; padding: 0 1rem; color: #1f2933; }
     nav a { margin-right: 1rem; }
     .cards { display: flex; gap: 1rem; flex-wrap: wrap; margin: 1.5rem 0; }
     .card { border: 1px solid #cbd2d9; border-radius: 6px; padding: 1rem 1.5rem; min-width: 10rem; }
     .card strong { display: block; font-size: 2rem; }
-    .note { color: #52606d; font-size: 0.9rem; }
+    .note, .help { color: #52606d; font-size: 0.9rem; }
+    table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+    th, td { border-bottom: 1px solid #e4e7eb; padding: 0.5rem; text-align: left; vertical-align: top; }
+    th { background: #f5f7fa; }
+    .banner { background: #e3f9e5; border: 1px solid #7bc47f; padding: 0.6rem 1rem; border-radius: 6px; }
+    .error { color: #b00020; font-size: 0.9rem; margin-top: 0.2rem; }
+    .field { margin-bottom: 1rem; }
+    .field label { display: block; font-weight: 600; margin-bottom: 0.2rem; }
+    input[type=text], input[type=date], select, textarea { width: 100%; max-width: 32rem; padding: 0.4rem; box-sizing: border-box; }
+    .button { display: inline-block; padding: 0.45rem 1rem; border: 1px solid #1f2933; border-radius: 4px; background: #1f2933; color: #fff; text-decoration: none; cursor: pointer; font-size: 1rem; }
+    .button.danger { background: #b00020; border-color: #b00020; }
+    .button.plain { background: #fff; color: #1f2933; }
+    form.inline { display: inline; }
+    .muted { color: #7b8794; }
+    .errorbox { background: #ffe3e3; border: 1px solid #e12d39; padding: 0.6rem 1rem; border-radius: 6px; }
+    .warnbox { background: #fff3c4; border: 1px solid #f0b429; padding: 0.6rem 1rem; border-radius: 6px; }
+    a.card { text-decoration: none; color: inherit; }
   </style>
 </head>
 <body>
   <header>
     <h1>VulaTrust</h1>
-    <nav><a href="/">Home</a></nav>
+    <nav><a href="/">Home</a><a href="/vendors">Vendors</a><a href="/applications">Applications</a><a href="/import">Import</a></nav>
   </header>
   <main>
     {% block content %}{% endblock %}
