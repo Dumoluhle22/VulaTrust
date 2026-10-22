@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Delete vendor - VulaTrust{% endblock %}
+{% block content %}
+<h2>Delete {{ vendor.name }}?</h2>
+<p>This cannot be undone.</p>
+{% if app_count %}
+<p>{{ app_count }} linked {{ "application" if app_count == 1 else "applications" }} will not be deleted. They will become unassigned.</p>
+{% endif %}
+<form method="post" action="/vendors/{{ vendor.id }}/delete">
+  <button class="button danger" type="submit">Yes, delete this vendor</button>
+  <a class="button plain" href="/vendors">Cancel</a>
+</form>
+{% endblock %}

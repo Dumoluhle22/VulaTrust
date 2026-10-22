@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Vendors - VulaTrust{% endblock %}
+{% block content %}
+<h2>Vendors</h2>
+{% if message %}<p class="banner">{{ message }}</p>{% endif %}
+<p><a class="button" href="/vendors/new">Add vendor</a></p>
+{% if vendors %}
+<table>
+  <thead>
+    <tr>
+      <th>Name</th><th>Domain</th><th>Owner</th><th>Personal info</th>
+      <th>Hosting</th><th>Agreement</th><th>Next review</th><th>Apps</th><th></th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for vendor in vendors %}
+    <tr>
+      <td><a href="/vendors/{{ vendor.id }}">{{ vendor.name }}</a></td>
+      <td>{% if vendor.primary_domain %}{{ vendor.primary_domain }}{% else %}<span class="muted">none</span>{% endif %}</td>
+      <td>{% if vendor.owner %}{{ vendor.owner }}{% else %}<span class="muted">no owner</span>{% endif %}</td>
+      <td>{{ vendor.handles_personal_info|pretty }}</td>
+      <td>{{ vendor.hosting_location|pretty }}</td>
+      <td>{{ vendor.operator_agreement_status|pretty }}</td>
+      <td>{% if vendor.next_review_due %}{{ vendor.next_review_due.isoformat() }}{% else %}<span class="muted">not set</span>{% endif %}</td>
+      <td>{{ vendor.applications|length }}</td>
+      <td>
+        <a href="/vendors/{{ vendor.id }}/edit">Edit</a> |
+        <a href="/vendors/{{ vendor.id }}/delete">Delete</a>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No vendors yet. Add your first vendor to get started.</p>
+{% endif %}
+{% endblock %}

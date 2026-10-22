@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% from "macros.html" import text_field, number_field, textarea_field, select_field %}
+{% block title %}{{ title }} - VulaTrust{% endblock %}
+{% block content %}
+<h2>{{ title }}</h2>
+{% if errors %}<p class="error">Please fix the problems marked below.</p>{% endif %}
+<form method="post" action="{{ action }}">
+  {{ text_field("name", "Application name", values, errors, required=True) }}
+  {{ select_field("vendor_id", "Vendor", vendor_options, values, errors, help="Leave as None if you do not know the vendor yet. The application will appear as unassigned.") }}
+  {{ select_field("source", "Where did you find it?", SOURCE_OPTIONS, values, errors) }}
+  {{ number_field("user_count", "Number of users", values, errors, help="How many people authorised or use it.") }}
+  {{ textarea_field("scopes", "Access it has", values, errors, help="For example calendar read/write, full drive access. Maximum 500 characters.") }}
+  {{ select_field("privileged", "Broad (privileged) access?", TRISTATE_OPTIONS, values, errors, help="Yes for access such as a full mailbox or all files. Unknown is not the same as No.") }}
+  <button class="button" type="submit">Save</button>
+  <a class="button plain" href="/applications">Cancel</a>
+</form>
+{% endblock %}

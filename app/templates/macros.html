@@ -1,0 +1,52 @@
+{% macro error(errors, name) %}
+{% if errors.get(name) %}<div class="error" id="{{ name }}-error">{{ errors[name] }}</div>{% endif %}
+{% endmacro %}
+
+{% macro text_field(name, label, values, errors, help="", required=False) %}
+<div class="field">
+  <label for="{{ name }}">{{ label }}{% if required %} *{% endif %}</label>
+  <input type="text" id="{{ name }}" name="{{ name }}" value="{{ values.get(name, '') }}"{% if required %} required{% endif %}>
+  {% if help %}<div class="help">{{ help }}</div>{% endif %}
+  {{ error(errors, name) }}
+</div>
+{% endmacro %}
+
+{% macro textarea_field(name, label, values, errors, help="") %}
+<div class="field">
+  <label for="{{ name }}">{{ label }}</label>
+  <textarea id="{{ name }}" name="{{ name }}" rows="3">{{ values.get(name, '') }}</textarea>
+  {% if help %}<div class="help">{{ help }}</div>{% endif %}
+  {{ error(errors, name) }}
+</div>
+{% endmacro %}
+
+{% macro date_field(name, label, values, errors, help="") %}
+<div class="field">
+  <label for="{{ name }}">{{ label }}</label>
+  <input type="date" id="{{ name }}" name="{{ name }}" value="{{ values.get(name, '') }}">
+  {% if help %}<div class="help">{{ help }}</div>{% endif %}
+  {{ error(errors, name) }}
+</div>
+{% endmacro %}
+
+{% macro select_field(name, label, options, values, errors, help="") %}
+<div class="field">
+  <label for="{{ name }}">{{ label }}</label>
+  <select id="{{ name }}" name="{{ name }}">
+    {% for value, text in options %}
+    <option value="{{ value }}"{% if values.get(name) == value %} selected{% endif %}>{{ text }}</option>
+    {% endfor %}
+  </select>
+  {% if help %}<div class="help">{{ help }}</div>{% endif %}
+  {{ error(errors, name) }}
+</div>
+{% endmacro %}
+
+{% macro number_field(name, label, values, errors, help="") %}
+<div class="field">
+  <label for="{{ name }}">{{ label }}</label>
+  <input type="number" id="{{ name }}" name="{{ name }}" min="0" step="1" value="{{ values.get(name, '') }}">
+  {% if help %}<div class="help">{{ help }}</div>{% endif %}
+  {{ error(errors, name) }}
+</div>
+{% endmacro %}
