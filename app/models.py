@@ -114,6 +114,9 @@ class ImportBatch(Base):
     matched_count: Mapped[int] = mapped_column(Integer, default=0)
     unassigned_count: Mapped[int] = mapped_column(Integer, default=0)
     rejected_count: Mapped[int] = mapped_column(Integer, default=0)
+    duplicate_count: Mapped[int] = mapped_column(Integer, default=0)
+    created_count: Mapped[int] = mapped_column(Integer, default=0)
+    updated_count: Mapped[int] = mapped_column(Integer, default=0)
 
     applications: Mapped[list["Application"]] = relationship(
         back_populates="import_batch", passive_deletes=True
@@ -148,6 +151,9 @@ class Application(Base):
     )
     # How the vendor link was made, e.g. "exact_domain" or "manual" (issue 10).
     match_method: Mapped[str | None] = mapped_column(String(50))
+    # The cleaned domain from the import file. Kept so a re-import can recognise
+    # the same application, and so a vendor can be created from it later.
+    source_domain: Mapped[str | None] = mapped_column(String(255))
 
     vendor: Mapped["Vendor | None"] = relationship(back_populates="applications")
     import_batch: Mapped["ImportBatch | None"] = relationship(

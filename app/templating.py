@@ -34,7 +34,20 @@ def pretty(value) -> str:
     return _LABELS.get(raw, str(raw))
 
 
+_MATCH_LABELS = {
+    "exact_domain": "Exact domain",
+    "subdomain": "Subdomain",
+    "manual": "Linked manually",
+}
+
+
+def match_label(value) -> str:
+    """Say how an application was linked to its vendor."""
+    return _MATCH_LABELS.get(value, "Not linked")
+
+
 templates.env.filters["pretty"] = pretty
+templates.env.filters["match_label"] = match_label
 templates.env.globals.update(
     TRISTATE_OPTIONS=TRISTATE_OPTIONS,
     HOSTING_OPTIONS=HOSTING_OPTIONS,

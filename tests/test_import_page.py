@@ -16,7 +16,7 @@ def upload(client, content: bytes, name: str = "apps.csv"):
 def test_import_page_loads_and_says_nothing_is_saved(client):
     response = client.get("/import")
     assert response.status_code == 200
-    assert "Nothing is saved" in response.text
+    assert "nothing is saved until you confirm" in response.text
     assert 'enctype="multipart/form-data"' in response.text
     assert "app_name, vendor_domain, source, user_count, scopes, privileged" in response.text
 

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Import history - VulaTrust{% endblock %}
+{% block content %}
+<h2>Import history</h2>
+<p><a class="button" href="/import">Import a file</a></p>
+{% if batches %}
+<table>
+  <thead>
+    <tr><th>When (UTC)</th><th>File</th><th>Rows read</th><th>New</th><th>Updated</th><th>Matched</th><th>Unassigned</th><th>Rejected</th><th>Duplicates</th><th></th></tr>
+  </thead>
+  <tbody>
+  {% for batch in batches %}
+    <tr>
+      <td>{{ batch.imported_at.strftime("%Y-%m-%d %H:%M") }}</td>
+      <td>{{ batch.filename }}</td>
+      <td>{{ batch.row_count }}</td>
+      <td>{{ batch.created_count }}</td>
+      <td>{{ batch.updated_count }}</td>
+      <td>{{ batch.matched_count }}</td>
+      <td>{{ batch.unassigned_count }}</td>
+      <td>{{ batch.rejected_count }}</td>
+      <td>{{ batch.duplicate_count }}</td>
+      <td><a href="/import/batches/{{ batch.id }}">View</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No imports yet.</p>
+{% endif %}
+{% endblock %}

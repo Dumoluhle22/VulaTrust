@@ -23,6 +23,9 @@ These are proposals for issues 9, 10, 11 and 15. If you decide differently, chan
 8. **Blank cells:** a blank source becomes `csv`, a blank privileged becomes `unknown` (never `no`), and a blank user count becomes 0. Source and privileged are accepted in any letter case.
 9. **Invalid domain:** a domain that is filled in but not valid does not reject the row. The application is kept, left unassigned, and a warning is shown.
 10. **File rules (issue 9):** `.csv` only, UTF-8 text (Excel's BOM is fine), at most 1 MB and 5,000 rows, comma or semicolon separated. The first row must hold the six column names in any order and any letter case, and extra columns are ignored. Line numbers count the header as line 1.
+11. **Matching (issue 10):** an application matches a vendor when its cleaned domain equals the vendor's domain (`exact_domain`) or ends with a dot plus the vendor's domain (`subdomain`). Only whole labels count, so `notpaytrack.example` does not match `paytrack.example`. If several vendor domains fit, the most specific one wins. A blank domain, an unknown domain, or a domain claimed by more than one vendor is left unassigned and never guessed.
+12. **Re-import (issue 11):** the same application is recognised by app name (ignoring case), cleaned domain and source. A re-import updates users, access and privileged from the file and creates no copies. A vendor link made by hand is never changed by an import, and hand-entered applications are never touched.
+13. **All or nothing:** an import saves every valid row or none of them.
 
 ## Expected import result for `apps.csv`
 
@@ -90,3 +93,28 @@ Level cut-offs: 70 or more is high, 40 to 69 is medium, below 40 is low.
 ## How these numbers were checked
 
 The expected import counts and scores above were reproduced with a separate throwaway script that applies the rules in this file to the two CSVs. Your own implementation in issues 10 and 15 should reproduce the same figures, which makes these files a ready-made test for both.
+
+## Expected result of confirming the import (issues 10 and 11)
+
+Load the vendors first (`python -m app.seed`), then import `apps.csv`.
+
+| Measure | Expected |
+|---|---|
+| Applications created | 16 |
+| Linked to a vendor | 11 |
+| Left unassigned | 5 (Mystery PDF Tool, Quick Notes, Survey Maker, Calendar Sync Pro, and the formula row) |
+| Matched by `subdomain` | 1 (ClinicNotes Reports, from `app.clinicnotes.example`) |
+| Matched by `exact_domain` | 10 |
+
+| Vendor | Applications linked |
+|---|---|
+| PayTrack | PayTrack Payroll, PayTrack Mobile |
+| ClinicNotes | ClinicNotes Web, ClinicNotes Reports |
+| QuickSign | QuickSign |
+| ChatBridge | ChatBridge Desktop |
+| Brightlearn LMS | Brightlearn LMS |
+| MailBlast | MailBlast |
+| DesignHub | DesignHub, DesignHub Plugin |
+| LedgerLite | LedgerLite |
+
+The import record shows 23 rows read, 16 new, 0 updated, 11 matched, 5 unassigned, 6 rejected and 1 duplicate. Importing the same file again gives 0 new and 16 updated, and the total stays at 16 applications.

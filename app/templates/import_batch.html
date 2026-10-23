@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Import {{ batch.id }} - VulaTrust{% endblock %}
+{% block content %}
+<h2>Import of {{ batch.filename }}</h2>
+{% if message %}<p class="banner">{{ message }}</p>{% endif %}
+<p class="note">Imported {{ batch.imported_at.strftime("%Y-%m-%d %H:%M") }} UTC.</p>
+<div class="cards">
+  <div class="card"><strong>{{ batch.row_count }}</strong>Rows read</div>
+  <div class="card"><strong>{{ batch.created_count }}</strong>New</div>
+  <div class="card"><strong>{{ batch.updated_count }}</strong>Updated</div>
+  <div class="card"><strong>{{ batch.matched_count }}</strong>Matched to a vendor</div>
+  <div class="card"><strong>{{ batch.unassigned_count }}</strong>Left unassigned</div>
+  <div class="card"><strong>{{ batch.rejected_count }}</strong>Rejected</div>
+  <div class="card"><strong>{{ batch.duplicate_count }}</strong>Duplicates skipped</div>
+</div>
+<p>
+  {% if batch.unassigned_count %}<a class="button" href="/applications/unassigned">Deal with unassigned applications</a>{% endif %}
+  <a class="button plain" href="/import/history">Import history</a>
+</p>
+<h3>Applications from this import ({{ applications|length }})</h3>
+<p class="note">An application updated by a later import is listed under that later import.</p>
+{% if applications %}
+<table>
+  <thead><tr><th>Name</th><th>Domain</th><th>Vendor</th><th>Linked by</th><th>Users</th></tr></thead>
+  <tbody>
+  {% for application in applications %}
+    <tr>
+      <td>{{ application.name }}</td>
+      <td>{% if application.source_domain %}{{ application.source_domain }}{% else %}<span class="muted">none</span>{% endif %}</td>
+      <td>{% if application.vendor %}<a href="/vendors/{{ application.vendor.id }}">{{ application.vendor.name }}</a>{% else %}<strong>Unassigned</strong>{% endif %}</td>
+      <td>{{ application.match_method|match_label }}</td>
+      <td>{{ application.user_count }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No applications are currently listed under this import.</p>
+{% endif %}
+{% endblock %}

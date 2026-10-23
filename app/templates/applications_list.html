@@ -7,13 +7,14 @@
 {% if applications %}
 <table>
   <thead>
-    <tr><th>Name</th><th>Vendor</th><th>Source</th><th>Users</th><th>Privileged</th><th>Found</th><th></th></tr>
+    <tr><th>Name</th><th>Vendor</th><th>Linked by</th><th>Source</th><th>Users</th><th>Privileged</th><th>Found</th><th></th></tr>
   </thead>
   <tbody>
   {% for application in applications %}
     <tr>
       <td>{{ application.name }}</td>
       <td>{% if application.vendor %}<a href="/vendors/{{ application.vendor.id }}">{{ application.vendor.name }}</a>{% else %}<strong>Unassigned</strong>{% endif %}</td>
+      <td>{{ application.match_method|match_label }}</td>
       <td>{{ application.source|pretty }}</td>
       <td>{{ application.user_count }}</td>
       <td>{{ application.privileged|pretty }}</td>

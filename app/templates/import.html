@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-{% block title %}Check a CSV file - VulaTrust{% endblock %}
+{% block title %}Import applications - VulaTrust{% endblock %}
 {% block content %}
-<h2>Check a CSV file</h2>
-<p>Upload a list of applications to see whether it can be imported. <strong>This page only checks the file. Nothing is saved.</strong></p>
+<h2>Import applications</h2>
+<p>Upload a list of applications. You will see what would happen first, and <strong>nothing is saved until you confirm the import.</strong></p>
 
 <form method="post" action="/import" enctype="multipart/form-data">
   <div class="field">
@@ -14,14 +14,15 @@
 </form>
 <p class="help">
   The first row must contain these column names: <code>{{ columns|join(", ") }}</code>.
-  <a href="/import/template.csv">Download a template</a>.
+  <a href="/import/template.csv">Download a template</a> |
+  <a href="/import/history">Import history</a><br>
   Blank source becomes csv, blank privileged becomes unknown, and a blank user count becomes 0.
 </p>
 
 {% if result %}
   <hr>
   {% if result.file_error %}
-    <p class="errorbox"><strong>Could not check the file.</strong> {{ result.file_error }}</p>
+    <p class="errorbox"><strong>Could not use the file.</strong> {{ result.file_error }}</p>
   {% else %}
     <h3>Result for {{ filename }}</h3>
     <div class="cards">
@@ -30,12 +31,29 @@
       <div class="card"><strong>{{ result.duplicates|length }}</strong>Duplicates skipped</div>
       <div class="card"><strong>{{ result.rejected|length }}</strong>Rejected</div>
     </div>
+    {% if plan and plan.rows %}
+    <div class="cards">
+      <div class="card"><strong>{{ plan.matched }}</strong>Matched to a vendor</div>
+      <div class="card"><strong>{{ plan.unassigned }}</strong>Left unassigned</div>
+      <div class="card"><strong>{{ plan.to_create }}</strong>New applications</div>
+      <div class="card"><strong>{{ plan.to_update }}</strong>Will be updated</div>
+    </div>
+    {% endif %}
     {% if result.blank_rows %}<p class="note">{{ result.blank_rows }} blank {{ "row was" if result.blank_rows == 1 else "rows were" }} ignored.</p>{% endif %}
     {% if result.rows_read == 0 %}<p class="warnbox">The file has a header but no data rows.</p>{% endif %}
+    {% if result.rows_read > 0 and not result.valid %}<p class="warnbox">Nothing can be imported: every row was rejected or is a duplicate.</p>{% endif %}
+
+    {% if token %}
+    <form method="post" action="/import/confirm">
+      <input type="hidden" name="token" value="{{ token }}">
+      <p><button class="button" type="submit">Confirm import of {{ plan.rows|length }} {{ "application" if plan.rows|length == 1 else "applications" }}</button></p>
+      <p class="note">Rows with a domain a vendor already uses are linked to that vendor. The rest are saved as unassigned so you can deal with them later. Importing the same file again updates the same applications and does not create copies.</p>
+    </form>
+    {% endif %}
 
     {% if result.rejected %}
     <h3>Rejected rows ({{ result.rejected|length }})</h3>
-    <p class="note">Fix these in your file and check it again. Line numbers count the header as line 1.</p>
+    <p class="note">These will not be imported. Fix them in your file and check it again. Line numbers count the header as line 1.</p>
     <table>
       <thead><tr><th>Line</th><th>App name</th><th>Why it was rejected</th></tr></thead>
       <tbody>
@@ -72,16 +90,23 @@
     {% endif %}
 
     {% if preview %}
-    <h3>Ready to import ({{ result.valid|length }})</h3>
-    {% if result.valid|length > preview_rows %}<p class="note">Showing the first {{ preview_rows }}.</p>{% endif %}
+    <h3>Ready to import ({{ plan.rows|length }})</h3>
+    {% if plan.rows|length > preview_rows %}<p class="note">Showing the first {{ preview_rows }}.</p>{% endif %}
     <table>
-      <thead><tr><th>Line</th><th>App name</th><th>Vendor domain</th><th>Source</th><th>Users</th><th>Privileged</th></tr></thead>
+      <thead><tr><th>Line</th><th>App name</th><th>Domain</th><th>Vendor</th><th>Action</th><th>Users</th><th>Privileged</th></tr></thead>
       <tbody>
-      {% for row in preview %}
+      {% for item in preview %}
         <tr>
-          <td>{{ row.line }}</td><td>{{ row.app_name }}</td>
-          <td>{% if row.vendor_domain %}{{ row.vendor_domain }}{% else %}<span class="muted">none (unassigned)</span>{% endif %}</td>
-          <td>{{ row.source|pretty }}</td><td>{{ row.user_count }}</td><td>{{ row.privileged|pretty }}</td>
+          <td>{{ item.row.line }}</td>
+          <td>{{ item.row.app_name }}</td>
+          <td>{% if item.row.vendor_domain %}{{ item.row.vendor_domain }}{% else %}<span class="muted">none</span>{% endif %}</td>
+          <td>
+            {% if item.match.vendor_id %}{{ plan.vendor_names[item.match.vendor_id] }} <span class="muted">({{ item.match.method|match_label }})</span>
+            {% else %}<strong>Unassigned</strong> <span class="muted">({{ item.match.reason }})</span>{% endif %}
+          </td>
+          <td>{{ "Update" if item.existing_id else "New" }}</td>
+          <td>{{ item.row.user_count }}</td>
+          <td>{{ item.row.privileged|pretty }}</td>
         </tr>
       {% endfor %}
       </tbody>
