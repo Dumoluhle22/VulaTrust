@@ -1,5 +1,6 @@
 import os
 import tempfile
+from datetime import date
 
 # Point the app at a throwaway database BEFORE importing it.
 _tmpdir = tempfile.mkdtemp(prefix="vulatrust-test-")
@@ -8,7 +9,7 @@ os.environ["DATABASE_URL"] = f"sqlite:///{_tmpdir}/test.db"
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 
-from app import models  # noqa: E402,F401  (registers the tables)
+from app import clock, models  # noqa: E402,F401  (registers the tables)
 from app.database import Base, SessionLocal, engine  # noqa: E402
 from app.main import app  # noqa: E402
 
@@ -33,3 +34,9 @@ def db():
 def client():
     with TestClient(app) as test_client:
         yield test_client
+
+
+@pytest.fixture(autouse=True)
+def fixed_today(monkeypatch):
+    """Every test runs on 13 October 2026, the reference date in sample_data/README.md."""
+    monkeypatch.setattr(clock, "today", lambda: date(2026, 10, 13))

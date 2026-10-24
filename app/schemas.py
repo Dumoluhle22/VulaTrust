@@ -51,3 +51,28 @@ class ApplicationForm(BaseModel):
     user_count: int = Field(default=0, ge=0, le=MAX_USER_COUNT)
     scopes: str | None = Field(default=None, max_length=MAX_SCOPES_LENGTH)
     privileged: TriState = TriState.UNKNOWN
+
+
+def validate_vendor_dates(form: "VendorForm", today: date) -> dict[str, str]:
+    """Cross-field date rules (issues 13 and 14). Returns errors keyed by field."""
+    errors: dict[str, str] = {}
+
+    signed = form.operator_agreement_status == AgreementStatus.SIGNED
+    if signed and form.operator_agreement_date is None:
+        errors["operator_agreement_date"] = "Enter the date the agreement was signed."
+    elif form.operator_agreement_date is not None and not signed:
+        errors["operator_agreement_date"] = (
+            "Only enter a date when the agreement is signed. Clear it, or set the status to Signed."
+        )
+    elif form.operator_agreement_date is not None and form.operator_agreement_date > today:
+        errors["operator_agreement_date"] = "The signing date cannot be in the future."
+
+    if form.last_reviewed is not None and form.last_reviewed > today:
+        errors["last_reviewed"] = "Last reviewed cannot be in the future."
+    if (
+        form.last_reviewed is not None
+        and form.next_review_due is not None
+        and form.next_review_due < form.last_reviewed
+    ):
+        errors["next_review_due"] = "Next review due cannot be before the last review."
+    return errors

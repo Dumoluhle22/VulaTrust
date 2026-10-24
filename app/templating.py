@@ -3,6 +3,8 @@ from pathlib import Path
 
 from fastapi.templating import Jinja2Templates
 
+from app.reviews import REVIEW_LABELS
+
 BASE_DIR = Path(__file__).resolve().parent
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
@@ -47,6 +49,7 @@ def match_label(value) -> str:
 
 
 templates.env.filters["pretty"] = pretty
+templates.env.filters["review_label"] = lambda value: REVIEW_LABELS.get(value, str(value))
 templates.env.filters["match_label"] = match_label
 templates.env.globals.update(
     TRISTATE_OPTIONS=TRISTATE_OPTIONS,

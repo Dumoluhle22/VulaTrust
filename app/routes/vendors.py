@@ -6,11 +6,14 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
+from app import clock
 from app.database import get_db
 from app.formutils import error_messages, read_form, values_from_object
 from app.messages import MESSAGES
 from app.models import Vendor
-from app.schemas import VendorForm
+from app.reviews import review_status
+from app.schemas import VendorForm, validate_vendor_dates
+from app.scoring import facts_from_vendor, score_vendor
 from app.templating import templates
 
 router = APIRouter()
@@ -37,13 +40,14 @@ def _validate(values: dict[str, str], db: Session, vendor_id: int | None = None)
         parsed = VendorForm(**data)
     except ValidationError as exc:
         return None, error_messages(exc)
+    errors = validate_vendor_dates(parsed, clock.today())
     if parsed.primary_domain:
         query = select(Vendor.id).where(Vendor.primary_domain == parsed.primary_domain)
         if vendor_id is not None:
             query = query.where(Vendor.id != vendor_id)
         if db.scalar(query) is not None:
-            return None, {"primary_domain": DUPLICATE_DOMAIN}
-    return parsed, {}
+            errors["primary_domain"] = DUPLICATE_DOMAIN
+    return (None, errors) if errors else (parsed, {})
 
 
 def _render_form(request, *, title, action, values, errors, vendor_id=None, status_code=200):
@@ -75,10 +79,12 @@ def list_vendors(request: Request, msg: str | None = None, db: Session = Depends
         .options(selectinload(Vendor.applications))
         .order_by(func.lower(Vendor.name))
     ).all()
+    today = clock.today()
+    scores = {v.id: score_vendor(facts_from_vendor(v), today) for v in vendors}
     return templates.TemplateResponse(
         request,
         "vendors_list.html",
-        {"vendors": vendors, "message": MESSAGES.get(msg or "")},
+        {"vendors": vendors, "scores": scores, "message": MESSAGES.get(msg or "")},
     )
 
 
@@ -96,10 +102,17 @@ def vendor_detail(
 ):
     vendor = _get_vendor_or_404(db, vendor_id)
     applications = sorted(vendor.applications, key=lambda a: a.name.lower())
+    today = clock.today()
     return templates.TemplateResponse(
         request,
         "vendor_detail.html",
-        {"vendor": vendor, "applications": applications, "message": MESSAGES.get(msg or "")},
+        {
+            "vendor": vendor,
+            "applications": applications,
+            "message": MESSAGES.get(msg or ""),
+            "score": score_vendor(facts_from_vendor(vendor), today),
+            "review": review_status(vendor.last_reviewed, vendor.next_review_due, today),
+        },
     )
 
 

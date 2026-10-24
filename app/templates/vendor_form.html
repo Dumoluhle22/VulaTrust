@@ -12,10 +12,10 @@
   {{ textarea_field("data_types", "Data handled", values, errors, help="For example customer contact details, payroll, health records.") }}
   {{ select_field("hosting_location", "Hosting location", HOSTING_OPTIONS, values, errors) }}
   {{ select_field("operator_agreement_status", "Operator agreement (POPIA)", AGREEMENT_OPTIONS, values, errors, help="Records whether a written agreement exists. It does not check that the agreement is adequate.") }}
-  {{ date_field("operator_agreement_date", "Agreement date", values, errors) }}
+  {{ date_field("operator_agreement_date", "Agreement date", values, errors, help="Required when the status is Signed. Leave blank otherwise. It cannot be in the future.") }}
   {{ text_field("certifications", "Certifications noted", values, errors, help="For example ISO 27001, SOC 2.") }}
-  {{ date_field("last_reviewed", "Last reviewed", values, errors) }}
-  {{ date_field("next_review_due", "Next review due", values, errors) }}
+  {{ date_field("last_reviewed", "Last reviewed", values, errors, help="Leave blank if this vendor has never been reviewed.") }}
+  {{ date_field("next_review_due", "Next review due", values, errors, help="Must not be before the last review. A vendor past this date counts as overdue.") }}
   {{ textarea_field("notes", "Notes", values, errors) }}
   <button class="button" type="submit">Save</button>
   <a class="button plain" href="/vendors">Cancel</a>

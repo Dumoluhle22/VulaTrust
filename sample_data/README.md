@@ -18,7 +18,7 @@ These are proposals for issues 9, 10, 11 and 15. If you decide differently, chan
 3. **Duplicates:** two rows with the same app name (ignoring upper or lower case), normalised domain and source count as one application. Only valid rows can be duplicates.
 4. **Rejected rows:** blank app name, user count that is not a whole number, is negative or is over 1,000,000, source not in manual/csv/google/microsoft, privileged not yes/no/unknown, scopes over 500 characters, app name over 200 characters, or a row with a different number of cells from the header. Every problem in a row is reported, not just the first.
 5. **Formula safety:** a cell starting with `=`, `+`, `-` or `@` is accepted but prefixed with an apostrophe so a spreadsheet will not run it.
-6. **Vendor-level inputs:** users are the **sum** across the vendor's applications. Privileged is **yes** if any application is yes, otherwise **unknown** if any is unknown.
+6. **Vendor-level inputs:** users are the **sum** across the vendor's applications. Privileged is **yes** if any application is yes, otherwise **unknown** if any is unknown. A vendor with **no applications** recorded is also treated as **unknown**, so it scores half the privileged points and is marked unverified.
 7. **Unknown inputs** add half a factor's points. The total is rounded half up to a whole number at the end.
 8. **Blank cells:** a blank source becomes `csv`, a blank privileged becomes `unknown` (never `no`), and a blank user count becomes 0. Source and privileged are accepted in any letter case.
 9. **Invalid domain:** a domain that is filled in but not valid does not reject the row. The application is kept, left unassigned, and a warning is shown.
@@ -26,6 +26,9 @@ These are proposals for issues 9, 10, 11 and 15. If you decide differently, chan
 11. **Matching (issue 10):** an application matches a vendor when its cleaned domain equals the vendor's domain (`exact_domain`) or ends with a dot plus the vendor's domain (`subdomain`). Only whole labels count, so `notpaytrack.example` does not match `paytrack.example`. If several vendor domains fit, the most specific one wins. A blank domain, an unknown domain, or a domain claimed by more than one vendor is left unassigned and never guessed.
 12. **Re-import (issue 11):** the same application is recognised by app name (ignoring case), cleaned domain and source. A re-import updates users, access and privileged from the file and creates no copies. A vendor link made by hand is never changed by an import, and hand-entered applications are never touched.
 13. **All or nothing:** an import saves every valid row or none of them.
+14. **Agreement dates (issue 13):** a signing date is required when the status is `signed`, may not be in the future, and may not be entered for any other status.
+15. **Review dates (issue 14):** last reviewed may not be in the future, and next review due may not be before the last review. A vendor is **overdue** when its next review date has passed (a review due today is not overdue) or when it was never reviewed. A vendor that was reviewed but has no next date is shown as "no next review date" and is not counted as overdue.
+16. **Scores use today's date.** The expected results in this file use 13 October 2026. The running app uses the real date, so a vendor's overdue status can change over time.
 
 ## Expected import result for `apps.csv`
 

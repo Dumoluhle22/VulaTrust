@@ -8,14 +8,16 @@
 <table>
   <thead>
     <tr>
-      <th>Name</th><th>Domain</th><th>Owner</th><th>Personal info</th>
+      <th>Name</th><th>Score</th><th>Domain</th><th>Owner</th><th>Personal info</th>
       <th>Hosting</th><th>Agreement</th><th>Next review</th><th>Apps</th><th></th>
     </tr>
   </thead>
   <tbody>
   {% for vendor in vendors %}
+    {% set score = scores[vendor.id] %}
     <tr>
       <td><a href="/vendors/{{ vendor.id }}">{{ vendor.name }}</a></td>
+      <td><span class="level level-{{ score.level }}">{{ score.score }} {{ score.level|capitalize }}</span></td>
       <td>{% if vendor.primary_domain %}{{ vendor.primary_domain }}{% else %}<span class="muted">none</span>{% endif %}</td>
       <td>{% if vendor.owner %}{{ vendor.owner }}{% else %}<span class="muted">no owner</span>{% endif %}</td>
       <td>{{ vendor.handles_personal_info|pretty }}</td>

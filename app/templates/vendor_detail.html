@@ -8,6 +8,37 @@
   <a class="button" href="/vendors/{{ vendor.id }}/edit">Edit vendor</a>
   <a class="button plain" href="/vendors">All vendors</a>
 </p>
+
+<h3>Risk score</h3>
+<p><span class="level level-{{ score.level }}">{{ score.score }} / 100: {{ score.level|capitalize }}</span></p>
+<p>
+  <strong>Completeness:</strong> {{ score.completeness.known }} of {{ score.completeness.total }} fields known.
+  {% if score.completeness.missing %}Missing: {{ score.completeness.missing|join(", ") }}.{% endif %}
+</p>
+{% if score.factors %}
+<table>
+  <thead><tr><th>Factor</th><th>Points</th><th>Status</th><th>Why</th></tr></thead>
+  <tbody>
+  {% for factor in score.factors %}
+    <tr>
+      <td>{{ factor.label }}</td>
+      <td>{{ "%g"|format(factor.points) }} of {{ factor.max_points }}</td>
+      <td><span class="tag">{{ factor.status }}</span></td>
+      <td>{{ factor.why }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No risk factors apply to this vendor.</p>
+{% endif %}
+{% if score.not_applied %}<p class="note">Checked and not adding points: {{ score.not_applied|join("; ") }}.</p>{% endif %}
+<p class="note">
+  This score helps decide where to look first. It is not proof that a vendor is secure or insecure.
+  Items marked <em>unverified</em> add half their points because the information is missing.
+</p>
+
+<h3>Details</h3>
 <table>
   <tbody>
     <tr><th>Domain</th><td>{{ val(vendor.primary_domain) }}</td></tr>
@@ -15,10 +46,15 @@
     <tr><th>Handles personal information</th><td>{{ vendor.handles_personal_info|pretty }}</td></tr>
     <tr><th>Data handled</th><td>{{ val(vendor.data_types) }}</td></tr>
     <tr><th>Hosting location</th><td>{{ vendor.hosting_location|pretty }}</td></tr>
-    <tr><th>Operator agreement</th><td>{{ vendor.operator_agreement_status|pretty }}{% if vendor.operator_agreement_date %} (dated {{ vendor.operator_agreement_date.isoformat() }}){% endif %}</td></tr>
+    <tr>
+      <th>Operator agreement</th>
+      <td>{{ vendor.operator_agreement_status|pretty }}{% if vendor.operator_agreement_date %} (signed {{ vendor.operator_agreement_date.isoformat() }}){% endif %}
+        <div class="note">Recording an agreement does not mean it is legally adequate.</div></td>
+    </tr>
     <tr><th>Certifications</th><td>{{ val(vendor.certifications) }}</td></tr>
     <tr><th>Last reviewed</th><td>{% if vendor.last_reviewed %}{{ vendor.last_reviewed.isoformat() }}{% else %}<span class="muted">never</span>{% endif %}</td></tr>
     <tr><th>Next review due</th><td>{{ val(vendor.next_review_due.isoformat() if vendor.next_review_due else "") }}</td></tr>
+    <tr><th>Review status</th><td>{{ review|review_label }}</td></tr>
     <tr><th>Notes</th><td>{{ val(vendor.notes) }}</td></tr>
   </tbody>
 </table>
