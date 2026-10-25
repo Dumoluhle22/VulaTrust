@@ -2,6 +2,9 @@
 {% block title %}Unassigned applications - VulaTrust{% endblock %}
 {% block content %}
 <h2>Unassigned applications</h2>
+{% if linked_count is not none %}
+<p class="banner">{% if linked_count %}{{ linked_count }} {{ "application was" if linked_count == 1 else "applications were" }} linked to a vendor by domain.{% else %}No unassigned application matched a vendor's domain.{% endif %}</p>
+{% endif %}
 <p>Applications with no vendor. Until a vendor is linked, nobody is accountable for them and they cannot be scored.</p>
 {% if applications %}
 <p><strong>{{ applications|length }}</strong> {{ "application needs" if applications|length == 1 else "applications need" }} a vendor.</p>
@@ -18,13 +21,20 @@
       <td>{{ application.privileged|pretty }}</td>
       <td>{% if application.scopes %}{{ application.scopes }}{% else %}<span class="muted">not set</span>{% endif %}</td>
       <td>{{ application.discovered_at.date().isoformat() }}</td>
-      <td><a class="button plain" href="/applications/{{ application.id }}/edit">Assign vendor</a></td>
+      <td><a class="button plain" href="/applications/{{ application.id }}/assign">Assign vendor</a></td>
     </tr>
   {% endfor %}
   </tbody>
 </table>
 {% else %}
 <p class="banner">Every application is linked to a vendor.</p>
+{% endif %}
+{% if can_rematch %}
+<form method="post" action="/applications/unassigned/rematch">
+  {% include "_csrf.html" %}
+  <button class="button plain" type="submit">Match again using current vendors</button>
+  <span class="help">Use this after adding vendors. Applications with a domain are linked when a vendor uses that domain.</span>
+</form>
 {% endif %}
 <p><a href="/applications">All applications</a></p>
 {% endblock %}

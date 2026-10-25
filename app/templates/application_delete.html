@@ -4,6 +4,7 @@
 <h2>Delete {{ application.name }}?</h2>
 <p>This cannot be undone.{% if application.vendor %} The vendor {{ application.vendor.name }} will not be deleted.{% endif %}</p>
 <form method="post" action="/applications/{{ application.id }}/delete">
+  {% include "_csrf.html" %}
   <button class="button danger" type="submit">Yes, delete this application</button>
   <a class="button plain" href="/applications">Cancel</a>
 </form>

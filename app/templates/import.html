@@ -5,6 +5,7 @@
 <p>Upload a list of applications. You will see what would happen first, and <strong>nothing is saved until you confirm the import.</strong></p>
 
 <form method="post" action="/import" enctype="multipart/form-data">
+  {% include "_csrf.html" %}
   <div class="field">
     <label for="file">CSV file</label>
     <input type="file" id="file" name="file" accept=".csv,text/csv">
@@ -45,6 +46,7 @@
 
     {% if token %}
     <form method="post" action="/import/confirm">
+  {% include "_csrf.html" %}
       <input type="hidden" name="token" value="{{ token }}">
       <p><button class="button" type="submit">Confirm import of {{ plan.rows|length }} {{ "application" if plan.rows|length == 1 else "applications" }}</button></p>
       <p class="note">Rows with a domain a vendor already uses are linked to that vendor. The rest are saved as unassigned so you can deal with them later. Importing the same file again updates the same applications and does not create copies.</p>

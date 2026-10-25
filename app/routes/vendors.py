@@ -10,7 +10,7 @@ from app import clock
 from app.database import get_db
 from app.formutils import error_messages, read_form, values_from_object
 from app.messages import MESSAGES
-from app.models import Vendor
+from app.models import Application, Vendor
 from app.reviews import review_status
 from app.schemas import VendorForm, validate_vendor_dates
 from app.scoring import facts_from_vendor, score_vendor
@@ -50,7 +50,9 @@ def _validate(values: dict[str, str], db: Session, vendor_id: int | None = None)
     return (None, errors) if errors else (parsed, {})
 
 
-def _render_form(request, *, title, action, values, errors, vendor_id=None, status_code=200):
+def _render_form(
+    request, *, title, action, values, errors, vendor_id=None, from_application=None, status_code=200
+):
     return templates.TemplateResponse(
         request,
         "vendor_form.html",
@@ -60,9 +62,18 @@ def _render_form(request, *, title, action, values, errors, vendor_id=None, stat
             "values": values,
             "errors": errors,
             "vendor_id": vendor_id,
+            "from_application": from_application,
         },
         status_code=status_code,
     )
+
+
+def _unassigned_application(db: Session, raw_id: str | None) -> Application | None:
+    """The application a new vendor is being created for, if it is real and still unassigned."""
+    if not raw_id or not raw_id.isdigit() or len(raw_id) > 9:
+        return None
+    application = db.get(Application, int(raw_id))
+    return application if application is not None and application.vendor_id is None else None
 
 
 def _get_vendor_or_404(db: Session, vendor_id: int) -> Vendor:
@@ -73,7 +84,9 @@ def _get_vendor_or_404(db: Session, vendor_id: int) -> Vendor:
 
 
 @router.get("/vendors")
-def list_vendors(request: Request, msg: str | None = None, db: Session = Depends(get_db)):
+def list_vendors(
+    request: Request, msg: str | None = None, level: str | None = None, db: Session = Depends(get_db)
+):
     vendors = db.scalars(
         select(Vendor)
         .options(selectinload(Vendor.applications))
@@ -81,18 +94,27 @@ def list_vendors(request: Request, msg: str | None = None, db: Session = Depends
     ).all()
     today = clock.today()
     scores = {v.id: score_vendor(facts_from_vendor(v), today) for v in vendors}
+    if level in ("high", "medium", "low"):
+        vendors = [v for v in vendors if scores[v.id].level == level]
+    else:
+        level = None  # anything else is ignored
     return templates.TemplateResponse(
         request,
         "vendors_list.html",
-        {"vendors": vendors, "scores": scores, "message": MESSAGES.get(msg or "")},
+        {"vendors": vendors, "scores": scores, "level": level, "message": MESSAGES.get(msg or "")},
     )
 
 
 @router.get("/vendors/new")
-def new_vendor_form(request: Request):
+def new_vendor_form(request: Request, from_application: str = "", db: Session = Depends(get_db)):
+    values = _blank_values()
+    application = _unassigned_application(db, from_application)
+    if application is not None:  # start from what the import already knows
+        values["name"] = application.name
+        values["primary_domain"] = application.source_domain or ""
     return _render_form(
         request, title="Add vendor", action="/vendors",
-        values=_blank_values(), errors={},
+        values=values, errors={}, from_application=application,
     )
 
 
@@ -119,19 +141,28 @@ def vendor_detail(
 @router.post("/vendors")
 async def create_vendor(request: Request, db: Session = Depends(get_db)):
     values = await read_form(request, FORM_FIELDS)
+    form = await request.form()
+    application = _unassigned_application(db, str(form.get("from_application") or ""))
     parsed, errors = _validate(values, db)
     if parsed is not None:
-        db.add(Vendor(**parsed.model_dump()))
+        vendor = Vendor(**parsed.model_dump())
+        db.add(vendor)
         try:
+            db.flush()  # gives the vendor an id before anything is linked to it
+            if application is not None:
+                application.vendor_id = vendor.id
+                application.match_method = "manual"  # a person made this link
             db.commit()
         except IntegrityError:  # two people saving the same domain at once
             db.rollback()
             errors = {"primary_domain": DUPLICATE_DOMAIN}
         else:
+            if application is not None:  # show the vendor with its newly linked application
+                return RedirectResponse(f"/vendors/{vendor.id}?msg=created_linked", status_code=303)
             return RedirectResponse("/vendors?msg=created", status_code=303)
     return _render_form(
         request, title="Add vendor", action="/vendors",
-        values=values, errors=errors, status_code=422,
+        values=values, errors=errors, from_application=application, status_code=422,
     )
 
 

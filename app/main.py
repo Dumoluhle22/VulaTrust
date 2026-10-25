@@ -2,12 +2,14 @@
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, Request
-from sqlalchemy import func, select
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
-from app import models
+from app import clock, models  # noqa: F401  (models registers the tables)
+from app.dashboard import build_dashboard
 from app.database import Base, engine, get_db
 from app.routes import applications, imports, vendors
+from app.security import CsrfError, csrf_error_page, require_csrf, security_middleware
 from app.templating import templates
 
 
@@ -18,7 +20,17 @@ async def lifespan(_app: FastAPI):
     yield
 
 
-app = FastAPI(title="VulaTrust", lifespan=lifespan)
+app = FastAPI(
+    title="VulaTrust",
+    lifespan=lifespan,
+    # The generated API documentation pages are not needed and would list every route.
+    docs_url=None,
+    redoc_url=None,
+    openapi_url=None,
+    dependencies=[Depends(require_csrf)],
+)
+app.middleware("http")(security_middleware)
+app.add_exception_handler(CsrfError, csrf_error_page)
 app.include_router(vendors.router)
 app.include_router(applications.router)
 app.include_router(imports.router)
@@ -30,23 +42,12 @@ def health() -> dict:
 
 
 @app.get("/")
-def home(request: Request, db: Session = Depends(get_db)):
-    vendor_count = db.scalar(select(func.count(models.Vendor.id))) or 0
-    application_count = db.scalar(select(func.count(models.Application.id))) or 0
-    unassigned_count = (
-        db.scalar(
-            select(func.count(models.Application.id)).where(
-                models.Application.vendor_id.is_(None)
-            )
-        )
-        or 0
-    )
+def dashboard(request: Request, db: Session = Depends(get_db)):
     return templates.TemplateResponse(
-        request,
-        "home.html",
-        {
-            "vendor_count": vendor_count,
-            "application_count": application_count,
-            "unassigned_count": unassigned_count,
-        },
+        request, "home.html", {"d": build_dashboard(db, clock.today())}
     )
+
+
+@app.get("/dashboard")
+def dashboard_alias():
+    return RedirectResponse("/", status_code=303)

@@ -133,12 +133,12 @@ def test_unassigned_page_lists_only_unlinked_applications(client, db):
     assert "<strong>2</strong> applications need a vendor" in html
 
 
-def test_unassigned_entries_link_to_the_edit_page(client, db):
+def test_unassigned_entries_link_to_the_assign_page(client, db):
     application = Application(name="Loose")
     db.add(application)
     db.commit()
     html = client.get("/applications/unassigned").text
-    assert f'href="/applications/{application.id}/edit"' in html
+    assert f'href="/applications/{application.id}/assign"' in html
     assert "Assign vendor" in html
 
 

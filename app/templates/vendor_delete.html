@@ -7,6 +7,7 @@
 <p>{{ app_count }} linked {{ "application" if app_count == 1 else "applications" }} will not be deleted. They will become unassigned.</p>
 {% endif %}
 <form method="post" action="/vendors/{{ vendor.id }}/delete">
+  {% include "_csrf.html" %}
   <button class="button danger" type="submit">Yes, delete this vendor</button>
   <a class="button plain" href="/vendors">Cancel</a>
 </form>

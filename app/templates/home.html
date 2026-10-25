@@ -1,11 +1,106 @@
 {% extends "base.html" %}
+{% block title %}Dashboard - VulaTrust{% endblock %}
+{% macro vendor_link(row) %}<a href="/vendors/{{ row.vendor.id }}">{{ row.vendor.name }}</a>{% endmacro %}
+{% macro badge(row) %}<span class="level level-{{ row.score.level }}">{{ row.score.score }} {{ row.score.level|capitalize }}</span>{% endmacro %}
 {% block content %}
+<h2>Dashboard</h2>
 <p>Know which third-party apps your business uses and which vendor records need attention.</p>
+
+{% if d.vendor_count == 0 and d.application_count == 0 %}
+<p class="banner">Nothing here yet. <a href="/vendors/new">Add a vendor</a> or <a href="/import">import a CSV file</a> to get started.</p>
+{% endif %}
+
 <div class="cards">
-  <div class="card"><strong>{{ vendor_count }}</strong>Vendors</div>
-  <div class="card"><strong>{{ application_count }}</strong>Applications</div>
-  <a class="card" href="/applications/unassigned"><strong>{{ unassigned_count }}</strong>Unassigned applications</a>
+  <div class="card"><strong>{{ d.vendor_count }}</strong>Vendors</div>
+  <div class="card"><strong>{{ d.application_count }}</strong>Applications</div>
+  <a class="card" href="/applications/unassigned"><strong>{{ d.unassigned_count }}</strong>Unassigned applications</a>
 </div>
-<p><a class="button" href="/vendors">Manage vendors</a> <a class="button plain" href="/applications">Manage applications</a> <a class="button plain" href="/import">Check a CSV file</a></p>
-<p class="note">Vendor matching and saving imported rows come next (issues 10 and 11).</p>
+<div class="cards">
+  <a class="card" href="/vendors?level=high"><strong>{{ d.level_counts.high }}</strong>High risk</a>
+  <a class="card" href="/vendors?level=medium"><strong>{{ d.level_counts.medium }}</strong>Medium risk</a>
+  <a class="card" href="/vendors?level=low"><strong>{{ d.level_counts.low }}</strong>Low risk</a>
+</div>
+<p>
+  <a class="button" href="/vendors">Manage vendors</a>
+  <a class="button plain" href="/applications">Manage applications</a>
+  <a class="button plain" href="/import">Import a CSV file</a>
+</p>
+
+<h3>Highest scores</h3>
+{% if d.top %}
+<table>
+  <thead><tr><th>Vendor</th><th>Score</th><th>Records complete</th></tr></thead>
+  <tbody>
+  {% for row in d.top %}
+    <tr><td>{{ vendor_link(row) }}</td><td>{{ badge(row) }}</td><td>{{ row.score.completeness.known }} of {{ row.score.completeness.total }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}<p>No vendors yet, so there are no scores to show.</p>{% endif %}
+
+<h3>No signed operator agreement ({{ d.no_agreement|length }})</h3>
+<p class="note">Vendors that handle, or may handle, personal information. Unknown counts as possible, because missing information is not treated as safe.</p>
+{% if d.no_agreement %}
+<table>
+  <thead><tr><th>Vendor</th><th>Personal information</th><th>Agreement</th><th>Score</th></tr></thead>
+  <tbody>
+  {% for row in d.no_agreement %}
+    <tr>
+      <td>{{ vendor_link(row) }}</td>
+      <td>{{ row.vendor.handles_personal_info|pretty }}</td>
+      <td>{{ row.vendor.operator_agreement_status|pretty }}</td>
+      <td>{{ badge(row) }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}<p>Every vendor that handles or may handle personal information has a signed agreement recorded.</p>{% endif %}
+
+<h3>Reviews overdue or never done ({{ d.overdue|length }})</h3>
+{% if d.overdue %}
+<table>
+  <thead><tr><th>Vendor</th><th>Status</th><th>Next review due</th></tr></thead>
+  <tbody>
+  {% for row in d.overdue %}
+    <tr>
+      <td>{{ vendor_link(row) }}</td>
+      <td>{{ row.review|review_label }}</td>
+      <td>{% if row.vendor.next_review_due %}{{ row.vendor.next_review_due.isoformat() }}{% else %}<span class="muted">not set</span>{% endif %}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}<p>No reviews are overdue.</p>{% endif %}
+
+<h3>Vendors with no owner ({{ d.no_owner|length }})</h3>
+{% if d.no_owner %}
+<table>
+  <thead><tr><th>Vendor</th><th>Score</th></tr></thead>
+  <tbody>
+  {% for row in d.no_owner %}<tr><td>{{ vendor_link(row) }}</td><td>{{ badge(row) }}</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% else %}<p>Every vendor has an owner.</p>{% endif %}
+
+<h3>Least complete records ({{ d.incomplete|length }})</h3>
+<p class="note">Seven fields are tracked for each vendor. Vendors with the most gaps come first. Gaps mean the score may be hiding problems.</p>
+{% if d.incomplete %}
+<table>
+  <thead><tr><th>Vendor</th><th>Known</th><th>Missing</th></tr></thead>
+  <tbody>
+  {% for row in d.incomplete %}
+    <tr>
+      <td>{{ vendor_link(row) }}</td>
+      <td>{{ row.score.completeness.known }} of {{ row.score.completeness.total }}</td>
+      <td>{{ row.score.completeness.missing|join(", ") }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}<p>Every vendor record is complete.</p>{% endif %}
+
+<h3>Unassigned applications</h3>
+{% if d.unassigned_count %}
+<p><a href="/applications/unassigned">{{ d.unassigned_count }} {{ "application has" if d.unassigned_count == 1 else "applications have" }} no vendor</a>. Link them so someone is accountable for each one.</p>
+{% else %}<p>Every application is linked to a vendor.</p>{% endif %}
 {% endblock %}

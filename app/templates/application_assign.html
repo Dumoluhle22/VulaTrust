@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% from "macros.html" import select_field %}
+{% block title %}Assign vendor - VulaTrust{% endblock %}
+{% block content %}
+<h2>Assign a vendor to {{ application.name }}</h2>
+<table>
+  <tbody>
+    <tr><th>Domain from the import</th><td>{% if application.source_domain %}{{ application.source_domain }}{% else %}<span class="muted">none</span>{% endif %}</td></tr>
+    <tr><th>Source</th><td>{{ application.source|pretty }}</td></tr>
+    <tr><th>Users</th><td>{{ application.user_count }}</td></tr>
+    <tr><th>Privileged</th><td>{{ application.privileged|pretty }}</td></tr>
+    <tr><th>Access</th><td>{% if application.scopes %}{{ application.scopes }}{% else %}<span class="muted">not set</span>{% endif %}</td></tr>
+    <tr><th>Current vendor</th><td>{% if application.vendor %}<a href="/vendors/{{ application.vendor.id }}">{{ application.vendor.name }}</a>{% else %}<strong>Unassigned</strong>{% endif %}</td></tr>
+  </tbody>
+</table>
+
+<h3>Link to an existing vendor</h3>
+{% if vendor_options %}
+<form method="post" action="/applications/{{ application.id }}/assign">
+  {% include "_csrf.html" %}
+  {{ select_field("vendor_id", "Vendor", vendor_options, values, errors) }}
+  <button class="button" type="submit">Link to this vendor</button>
+</form>
+{% else %}
+<p>There are no vendors yet. Create one below.</p>
+{% endif %}
+
+<h3>Or create a new vendor</h3>
+<p>The new vendor starts with this application's name and domain, and is linked to it when you save.</p>
+<p><a class="button plain" href="/vendors/new?from_application={{ application.id }}">Create a new vendor</a></p>
+
+<p><a href="/applications/{{ application.id }}/edit">Edit application details</a> | <a href="/applications/unassigned">Back to unassigned applications</a></p>
+{% endblock %}

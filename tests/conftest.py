@@ -5,6 +5,8 @@ from datetime import date
 # Point the app at a throwaway database BEFORE importing it.
 _tmpdir = tempfile.mkdtemp(prefix="vulatrust-test-")
 os.environ["DATABASE_URL"] = f"sqlite:///{_tmpdir}/test.db"
+# Most tests post forms directly. The CSRF tests switch the check back on.
+os.environ["VULATRUST_CSRF"] = "0"
 
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402

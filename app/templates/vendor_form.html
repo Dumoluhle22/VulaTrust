@@ -5,6 +5,11 @@
 <h2>{{ title }}</h2>
 {% if errors %}<p class="error">Please fix the problems marked below.</p>{% endif %}
 <form method="post" action="{{ action }}">
+  {% include "_csrf.html" %}
+  {% if from_application %}
+  <input type="hidden" name="from_application" value="{{ from_application.id }}">
+  <p class="warnbox">This vendor will be linked to the application <strong>{{ from_application.name }}</strong> when you save. The name and domain were copied from the application. Check that the domain is the vendor's main domain and not a subdomain.</p>
+  {% endif %}
   {{ text_field("name", "Vendor name", values, errors, required=True) }}
   {{ text_field("primary_domain", "Primary domain", values, errors, help="For example paytrack.example. Used to match imported applications. Optional.") }}
   {{ text_field("owner", "Owner", values, errors, help="The person responsible for this relationship.") }}

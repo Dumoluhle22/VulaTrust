@@ -1,13 +1,12 @@
 # VulaTrust
-### Open-Source SaaS Discovery & Vendor Assurance for South African SMEs
+
+## Open-Source SaaS Discovery & Vendor Assurance for South African SMEs
 
 **Know which third-party apps your business uses, what information they may access, and which vendor records need attention.**
 
-VulaTrust is a proposed open-source cybersecurity tool that helps small and medium-sized South African businesses connect third-party SaaS application inventories with vendor-assurance records.
+VulaTrust is an open-source cybersecurity tool for small and medium-sized South African businesses. It connects a list of discovered SaaS applications to a vendor register, tracks POPIA-related records, and ranks vendors with a score that explains itself, so a business without a security team can see where to look first.
 
-The project explores whether a lightweight, explainable workflow can help businesses identify unassigned applications, track POPIA-related records, and prioritise vendor reviews without a dedicated security team.
-
-> **Project status:** Research and development. The features below describe the intended project, and not all of them are implemented yet.
+> **Project status:** working prototype. The core features below are built and tested. User interviews and the usability test are still to be completed (see [Limitations](#14-limitations)). The tool has no login, so run it on your own computer only.
 
 ---
 
@@ -18,14 +17,14 @@ The project explores whether a lightweight, explainable workflow can help busine
 3. [Who is affected](#3-who-is-affected)
 4. [Targeted industries](#4-targeted-industries)
 5. [Existing work and the gap](#5-existing-work-and-the-gap)
-6. [Proposed solution](#6-proposed-solution)
-7. [Scope](#7-scope)
-8. [Data model](#8-data-model-starting-point)
-9. [Risk scoring](#9-risk-scoring-provisional)
-10. [Security and privacy principles](#10-security-and-privacy-principles)
-11. [Technology stack](#11-technology-stack)
-12. [Development roadmap](#12-development-roadmap)
-13. [Evaluation criteria](#13-evaluation-criteria)
+6. [What VulaTrust does](#6-what-vulatrust-does)
+7. [Quick start](#7-quick-start)
+8. [How the score works](#8-how-the-score-works)
+9. [Scope](#9-scope)
+10. [Technology](#10-technology)
+11. [Project layout and documentation](#11-project-layout-and-documentation)
+12. [Security](#12-security)
+13. [Testing and evaluation](#13-testing-and-evaluation)
 14. [Limitations](#14-limitations)
 15. [Contributing and licence](#15-contributing-and-licence)
 16. [Disclaimer](#16-disclaimer)
@@ -48,35 +47,33 @@ The project's working question is narrower: **can a focused workflow that connec
 
 ## 2. The problem
 
-Small businesses increasingly rely on third-party services for accounting, payroll, email, file sharing, customer management and daily operations.
+Small businesses rely on third-party services for accounting, payroll, email, file sharing, customer management and daily operations. Employees connect more of them to company accounts, for example by choosing "Sign in with Google". Information about suppliers, data handling, agreements and review dates ends up scattered across spreadsheets, emails and documents.
 
-Over time, employees may authorise additional applications through company accounts, for example by choosing "Sign in with Google" or approving an app's access request. Meanwhile, information about suppliers, data handling, operator agreements and review dates is scattered across spreadsheets, emails and documents.
+That causes three practical problems:
 
-This creates three practical challenges:
-
-- **Incomplete visibility:** the business may not have a consolidated inventory of the third-party applications connected to its accounts.
-- **Disconnected records:** application inventories and vendor-assurance information are maintained separately, if at all.
-- **Unclear priorities:** business owners struggle to see missing records, overdue reviews and applications that warrant a closer look.
+- **Incomplete visibility:** nobody has a full list of the applications connected to company accounts.
+- **Disconnected records:** application lists and vendor-assurance information are kept separately, if at all.
+- **Unclear priorities:** owners cannot easily see missing records, overdue reviews, or what warrants a closer look.
 
 ### Why POPIA makes this matter
 
 South Africa's Protection of Personal Information Act (POPIA) puts responsibility on the business that decides how personal information is processed. Depending on the processing relationship:
 
-- Section 21 requires a **written contract** with an operator (an outside party processing personal information on the business's behalf), requiring the operator to maintain the security measures in section 19.
+- Section 21 requires a **written contract** with an operator (an outside party processing personal information on your behalf), requiring it to maintain the security measures in section 19.
 - The business generally **remains responsible** for the security of that information even when an operator handles it.
-- The Information Regulator has enforced this. In its enforcement notice against Dis-Chem, it found that the company had not concluded a written contract with its operator.
+- The Information Regulator has enforced this. In its enforcement notice against Dis-Chem, it found the company had not concluded a written contract with its operator.
 
-VulaTrust aims to help organise the relevant records and follow-up actions. **It is not a legal compliance certification tool.**
+VulaTrust helps organise the relevant records and follow-up actions. **It is not a legal compliance tool.**
 
 ---
 
 ## 3. Who is affected
 
 | Group | How they are affected |
-|---|---|
+| --- | --- |
 | **Business owners and directors** | Accountable under POPIA. In many companies the CEO is automatically the information officer, so they carry the risk without necessarily having a security background. |
 | **Office managers and IT contractors** | Often the people who end up tracking vendors, with little time and no specialist tools. |
-| **Employees** | Connect applications to company accounts to get work done, often without knowing what access they are granting. |
+| **Employees** | Connect applications to company accounts to get work done, often without knowing what access they grant. |
 | **Customers, patients and learners (data subjects)** | Their personal information is exposed if a vendor is breached or misconfigured. |
 | **Vendors and suppliers** | Are asked for agreements and security evidence, usually ad hoc. |
 | **Regulators** | The Information Regulator expects documented operator agreements and security measures. |
@@ -85,328 +82,220 @@ VulaTrust aims to help organise the relevant records and follow-up actions. **It
 
 ## 4. Targeted industries
 
-The initial focus is South African SMEs that use third-party software to handle business or personal information but have limited dedicated cybersecurity resources.
-
-Proposed starting segments (these are assumptions, not confirmed users, and their needs must be investigated):
+The focus is South African SMEs that use third-party software to handle business or personal information but have limited dedicated cybersecurity resources. These segments are **assumptions, not confirmed users**:
 
 - **Healthcare practices and clinics:** patient records in practice-management and billing software.
 - **Accounting, legal and advisory firms:** client financial data across many cloud tools.
 - **Insurance and financial-services brokers:** personal and financial information shared with providers.
 - **Retail and e-commerce:** customer data in payment, marketing and delivery platforms.
-- **Education and training providers:** learner records in learning-management and administration systems.
-- **Property and recruitment agencies:** ID documents, contact and employment data shared with several platforms.
+- **Education and training providers:** learner records in learning-management systems.
+- **Property and recruitment agencies:** ID documents and employment data shared with several platforms.
 - **NGOs and non-profits:** donor and beneficiary data in free or low-cost tools.
 
-The prototype itself is industry-neutral. The segments mainly decide which sample data, examples and interview participants are used.
+The tool itself is industry-neutral. The segments mainly decide which examples and interview participants are used.
 
 ---
 
 ## 5. Existing work and the gap
 
-VulaTrust does **not** claim that vendor-risk management is missing from the open-source ecosystem. Existing projects already address parts of the problem.
+VulaTrust does **not** claim that vendor-risk management is missing from the open-source world. Existing projects cover parts of the problem.
 
-### Projects reviewed
+| Project | Focus | Verified how |
+| --- | --- | --- |
+| [Aperio](https://github.com/writer/aperio) | SaaS security posture, OAuth app discovery, findings sent to a SIEM | README, database schema and a search of the full source |
+| [open-SSPM](https://github.com/open-sspm/open-sspm) | "Who has access to what": identities, permissions, discovered apps, review workflow | README, database schema and a search of the full source |
+| [CISO Assistant Community Edition](https://github.com/intuitem/ciso-assistant-community) | Broad governance, risk and compliance, including third-party risk and contracts | README and feature list only |
 
-Aperio and open-SSPM were reviewed by reading their READMEs, database schemas and source code (main-branch snapshots, October 2026). CISO Assistant was reviewed at README and feature-list level only.
+Searching Aperio's and open-SSPM's schemas and code for vendor-assurance terms (SOC 2, ISO 27001, questionnaires, data processing agreements, data residency, POPIA, "vendor risk") found nothing relevant. Details are in [`docs/related-work.md`](docs/related-work.md).
 
-**[Aperio](https://github.com/writer/aperio)** (SaaS security posture, discovery and findings)
-- Detects SaaS posture risks and inventories OAuth-authorised apps, then streams findings to a SIEM.
-- Models apps as a security asset with technical and business owners, criticality, a sensitive-data flag and a risk score, plus a risk-exception workflow (rationale, controls, expiry, approver).
-- Has no vendor entity. The only "vendor" fields in its code describe SIEM products.
-
-**[open-SSPM](https://github.com/open-sspm/open-sspm)** (SaaS visibility, identity and access governance)
-- A "who has access to what" service that syncs identities and permissions from an identity provider and connected apps.
-- Builds a discovered-app inventory, a review workflow (sanctioned, tolerated, replace, owner, follow-up date, ticket reference) and an app-level risk score from 0 to 100.
-- `vendor_name` is a text label on the app. The code uses the vendor name a connector reports, or derives a label from the app's domain.
-
-**[CISO Assistant Community Edition](https://github.com/intuitem/ciso-assistant-community)** (broader GRC)
-- A general open-source governance, risk and compliance platform whose features include third-party risk management, contracts management and evidence management.
-- Built for security and compliance teams. Its third-party module has not yet been examined in depth.
-
-### Gap
-
-Searching the full source of Aperio and open-SSPM for vendor-assurance terms (SOC 2, ISO 27001, questionnaire, data processing agreement, data residency, POPIA, GDPR, third-party or vendor risk) found nothing relevant in either.
-
-| Capability | Aperio | open-SSPM | VulaTrust (planned) |
-|---|---|---|---|
+| Capability | Aperio | open-SSPM | VulaTrust |
+| --- | --- | --- | --- |
 | Discovers third-party apps | Yes (OAuth) | Yes (SSO and OAuth) | Via CSV import |
-| App-level risk score | Yes | Yes | Yes |
+| App-level risk score | Yes | Yes | Per vendor, using app data |
 | First-class vendor record | No | Text label only | Yes |
 | Several apps grouped under one vendor | No | No | Yes |
 | Operator-agreement tracking (POPIA s21) | No | No | Yes |
 | Hosting location per vendor | No | No | Yes |
 | Vendor-level risk score | No | No | Yes |
 | Review-due tracking per vendor | No | App review date only | Yes |
-| Aimed at non-security staff | No (SIEM-centred) | No (identity-centred) | Yes |
+| Built for non-security staff | No (SIEM-centred) | No (identity-centred) | Intended, not yet tested with users |
 
-### Why not a spreadsheet?
+**Honest positioning.** Both SSPM tools find and govern applications but never answer "which vendor is this, and do we have the right agreement?". General GRC tools such as CISO Assistant cover vendors but are built for dedicated security teams. VulaTrust tries to join discovery to a simple vendor register for a small business under POPIA. Whether that is worth having is what the research and usability testing are meant to show.
 
-A spreadsheet is a serious alternative and is what most small businesses use today. VulaTrust's value depends on whether these provide enough benefit to justify a dedicated tool:
-
-- imports that fill the register instead of typing vendors in by hand,
-- vendor matching that surfaces apps nobody remembered to list,
-- transparent, calculated prioritisation,
-- review dates that are tracked rather than remembered.
+**Versus a spreadsheet.** A spreadsheet is the realistic alternative. VulaTrust's possible advantages are that an import fills the register (so applications nobody remembered to list appear), and that scores, overdue reviews and priorities are calculated and explained instead of relying on memory.
 
 ---
 
-## 6. Proposed solution
+## 6. What VulaTrust does
 
-VulaTrust connects application discovery with a practical vendor register. Instead of treating each discovered application as an isolated entry, it lets applications be matched to vendors and associated with the data handled, hosting location, operator-agreement status, assurance evidence and review dates.
-
-The intended workflow:
-
-1. **Import:** bring in a list of third-party applications from CSV.
-2. **Match:** link applications to existing vendor records using identifiers such as domains.
-3. **Review:** flag applications that cannot confidently be matched to a vendor.
-4. **Record:** track vendor information and operator-agreement status.
-5. **Prioritise:** calculate an explainable provisional score and highlight outstanding actions.
-
-Design principle: **minimal required data entry.** The person maintaining the register may spend only a few minutes a month, so most fields are optional and imports should do most of the filling.
-
-Automatic discovery through Google Workspace or Microsoft 365 is a possible extension, subject to feasibility testing.
+- **Vendor register:** name, domain, owner, whether it handles personal information, data handled, hosting location, operator-agreement status and date, certifications, review dates and notes.
+- **Application register:** applications linked to vendors, with source, number of users, access description and a privileged-access flag. Applications can be unassigned.
+- **CSV import with a safe preview:** a file is checked first and nothing is saved until you confirm. Every rejected row is listed with its line number and every problem. Imports are all-or-nothing and re-importing updates rather than duplicates.
+- **Vendor matching by domain:** exact and subdomain matches, never guessed, with the method recorded. Links made by hand are never overridden.
+- **Unassigned applications:** link to an existing vendor, create a vendor from the application, or match again after adding vendors.
+- **Explainable risk score:** see [section 8](#8-how-the-score-works).
+- **Dashboard:** counts by risk level, highest scores, vendors with no signed operator agreement, overdue reviews, vendors with no owner, least complete records, and unassigned applications.
+- **Safety and honesty:** unknown is never treated as safe, and every score lists its reasons.
 
 ---
 
-## 7. Scope
+## 7. Quick start
 
-### MVP (planned)
+Needs Python 3.10 or newer. Full instructions, including Windows and troubleshooting, are in [`docs/setup.md`](docs/setup.md).
 
-**Vendor inventory**
-- Create, edit and list vendor records with a business owner.
-- Record categories of information handled, hosting location and certifications noted.
-- Track operator-agreement status (none, requested, signed) and its date.
+```bash
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python -m pytest                   # run the tests
+python -m app.seed                 # load 8 synthetic sample vendors
+python -m uvicorn app.main:app --reload
+```
 
-**Application inventory**
-- Import application records from CSV with validation and unmatched-record handling.
-- Link applications to vendors; record discovery source, user counts and access scopes.
-- Keep unassigned applications visible in a review queue.
-- Keep an import record for traceability.
+Open <http://127.0.0.1:8000>, then go to **Import** and upload `sample_data/apps.csv`. The expected results are listed in [`sample_data/README.md`](sample_data/README.md), and a 10-minute walkthrough is in [`docs/demo-script.md`](docs/demo-script.md).
 
-**Review tracking**
-- Last-reviewed and next-review-due dates, with an overdue flag.
-- Flag missing or unverified information.
+---
 
-**Explainable prioritisation**
-- Provisional vendor-level score with documented factors and weights.
-- Show which factors contributed, and separate known risks from missing information.
+## 8. How the score works
 
-**Dashboard**
-- Vendors requiring attention, missing operator agreements, overdue reviews, unassigned applications, and vendors with incomplete information.
+Each vendor gets a score from 0 to 100 and a level: **High** (70 or more), **Medium** (40 to 69) or **Low** (below 40).
 
-**Supporting material**
-- Synthetic sample data, automated tests and setup documentation.
+| Factor | Points |
+| --- | --- |
+| Handles personal information and has no signed operator agreement | 35 |
+| Has an application with broad (privileged) access | 20 |
+| No owner assigned | 15 |
+| Review overdue, or never reviewed | 15 |
+| Hosted outside South Africa | 10 |
+| Five or more users connected | 5 |
 
-### Stretch (only if time allows)
+- **Unknown is never treated as safe.** An unknown input adds half of that factor's points and is labelled **unverified**.
+- Each score is shown with its **completeness** (how many of seven fields are known) and the reason for every factor.
+- The score decides where to look first. It is **not proof** that a vendor is secure or insecure.
 
-- Follow-up action tracking for issues needing attention.
-- Audit log of important record changes.
-- Login and roles, if the app is demonstrated as a deployed service.
-- Direct import from Google Workspace or Microsoft 365.
-- Matching confidence indicators.
-- CSV or PDF export, and review reminders.
-- Additional assurance-evidence workflows.
+The weights are a reasoned starting point and have not been validated against real incidents. Full details and the reasoning are in [`docs/scoring.md`](docs/scoring.md).
+
+---
+
+## 9. Scope
+
+### Built
+
+- Vendor and application registers with validation and safe defaults
+- CSV check, preview, confirm, history, matching and re-import
+- Operator-agreement and review-date rules
+- Explainable vendor score and dashboard
+- Security protections (see section 12)
+- Synthetic sample data with documented expected results, and automated tests
+
+### Not built (possible future work)
+
+- Login and roles, and an audit log
+- Direct import from Google Workspace or Microsoft 365
+- CSV or PDF export, review reminders, follow-up actions, match-confidence indicators
 
 ### Out of scope
 
-- Real-time security monitoring or SIEM functionality.
-- External vendor vulnerability scanning or breach monitoring.
-- Automated legal interpretation of contracts.
-- Automatic claims of POPIA compliance.
-- Enterprise-scale multi-organisation hosting.
-- Automatic revocation of application permissions.
+- Real-time monitoring or SIEM functions
+- Scanning vendors from outside, or breach monitoring
+- Automated legal interpretation of contracts
+- Claims of POPIA compliance
+- Multi-organisation hosting
+- Automatic revocation of application permissions
 
 ---
 
-## 8. Data model (starting point)
+## 10. Technology
 
-Names and types may change as the design is tested.
+| Component | Technology |
+| --- | --- |
+| Language | Python 3.10+ |
+| Web framework | FastAPI with Uvicorn |
+| Database | SQLite through SQLAlchemy |
+| Validation | Pydantic |
+| Pages | Server-rendered Jinja2 templates. No JavaScript. |
+| Tests | pytest, with pytest-cov for coverage |
+| Automation | A GitHub Actions workflow runs the tests (not yet run on GitHub) |
 
-**Known, unknown, or not applicable.** Fields that describe a vendor's safeguards should allow **yes, no or unknown**, never a silent default. Unknown must stay visible and must not be treated as evidence of safety.
+---
 
-### vendors
+## 11. Project layout and documentation
 
-| Field | Notes |
-|---|---|
-| id, name, primary_domain | The domain helps match discovered applications |
-| owner | Person responsible for the relationship |
-| handles_personal_info | yes / no / unknown |
-| data_types | Free text or tags, for example customer contact details, health, payroll |
-| hosting_location | South Africa / outside South Africa / unknown |
-| operator_agreement_status | none / requested / signed / unknown |
-| operator_agreement_date | Date signed, if any |
-| certifications | Free text, for example SOC 2, ISO 27001 |
-| last_reviewed, next_review_due | Dates |
-| notes | Free text |
-
-### applications
-
-| Field | Notes |
-|---|---|
-| id, name | Discovered or manually added |
-| vendor_id | Nullable, so unmatched applications show as unassigned |
-| source | manual / csv / google / microsoft |
-| discovered_at | Date of import |
-| user_count | Number of people who authorised or use it |
-| scopes | Text summary of the access granted |
-| privileged | yes / no / unknown (broad access such as full mailbox or drive) |
-
-### import_batches
-
-id, source, imported_at, row_count and filename, so imports can be traced.
-
-### Sample CSV
-
-```csv
-app_name,vendor_domain,source,user_count,scopes,privileged
-Example Scheduler,examplescheduler.com,google,12,"calendar read/write",no
-Example File Share,examplefiles.io,google,4,"full drive access",yes
+```text
+app/            application code (see docs/data-model.md for the module map)
+tests/          automated tests
+sample_data/    synthetic vendors and applications, with expected results
+docs/           documentation
 ```
 
-Use synthetic data. If you test with a real Google account's third-party access list, anonymise it before anything enters the repository.
+| Document | What it covers |
+| --- | --- |
+| [`docs/setup.md`](docs/setup.md) | Install, run, reset, troubleshoot |
+| [`docs/user-guide.md`](docs/user-guide.md) | How to use each screen |
+| [`docs/data-model.md`](docs/data-model.md) | Tables, fields and the code layout |
+| [`docs/scoring.md`](docs/scoring.md) | The score, unknown handling, reasoning and limits |
+| [`docs/security-notes.md`](docs/security-notes.md) | Protections, tests and known gaps |
+| [`docs/testing.md`](docs/testing.md) | Test inventory, coverage and what is not covered |
+| [`docs/related-work.md`](docs/related-work.md) | What was checked about similar projects |
+| [`docs/demo-script.md`](docs/demo-script.md) | A 10-minute demonstration |
+| [`docs/report-outline.md`](docs/report-outline.md) | Report structure and the evaluation table |
+| [`docs/interview-guide.md`](docs/interview-guide.md), [`docs/usability-test.md`](docs/usability-test.md) | Guides for the user research |
 
 ---
 
-## 9. Risk scoring (provisional)
+## 12. Security
 
-The score is deliberately simple so a business owner can see why a vendor is flagged. The idea of a transparent points formula is borrowed from open-SSPM's approach, but this version works at vendor level and adds POPIA-related factors. **Weights and thresholds are provisional. Tune them during testing and justify the final choices.**
+VulaTrust stores business records, so it protects them where it can. Highlights:
 
-| Factor | Points |
-|---|---|
-| Handles personal information and no signed operator agreement | 35 |
-| Has an application with a privileged access scope | 20 |
-| No owner assigned | 15 |
-| Review overdue or never reviewed | 15 |
-| Hosted outside South Africa | 10 |
-| Five or more users connected to it | 5 |
+- Database access through parameterised queries, and all page text escaped. Pages contain no scripts, and a strict Content-Security-Policy is set.
+- **CSRF protection** on every form (a random token matched to a `SameSite=Strict` cookie), with a test that fails if a new form lacks it.
+- Uploads limited to `.csv`, 1 MB, 5,000 rows and UTF-8 text. Files are never saved or executed, and spreadsheet formula characters are neutralised.
+- The generated API docs and debug mode are off, and responses are not cached.
 
-- The total is capped at 100.
-- Suggested levels: 70 or more is high, 40 to 69 is medium, below 40 is low.
-- **Unknown inputs** add half of a factor's points and are labelled "unverified", so missing information is never scored as safe.
-- Each score is shown with a **completeness figure** (for example, "score 55, 4 of 7 fields known") and the list of contributing factors.
-
-The score prioritises attention. It is not proof that a vendor is secure or insecure.
+**The largest gap: there is no login.** Run it only on your own computer and never expose it to a network. Other known gaps (no HTTPS, no rate limiting, no audit log, unpinned dependencies) are listed in [`docs/security-notes.md`](docs/security-notes.md).
 
 ---
 
-## 10. Security and privacy principles
+## 13. Testing and evaluation
 
-VulaTrust is itself a security-related application, so its design must account for the information it stores.
+**333 automated tests pass, with 98% line coverage of `app/`.** Details are in [`docs/testing.md`](docs/testing.md).
 
-The project aims to incorporate:
+| Criterion | Result |
+| --- | --- |
+| A CSV of about 20 synthetic applications imports without errors | Met. 23 rows read, 16 imported, 1 duplicate and 6 invalid rows reported |
+| At least 90% of applications that belong to a registered vendor match it by domain | Met, 11 of 11, on the synthetic sample |
+| Unmatched applications stay visible | Met |
+| Scores are reproducible and every factor is visible | Met |
+| Personal information with no signed agreement scores at least 35 | Met |
+| Unknown information is flagged and not treated as safe | Met |
+| Adding an agreement, owner or review lowers the score as expected | Met |
+| Missing agreements and overdue reviews are identified | Met |
+| Input validation and database tests pass | Met |
+| People without a security background complete the key tasks | **Not yet measured**, see [`docs/usability-test.md`](docs/usability-test.md) |
 
-- Input validation and safe database access (parameterised queries through the ORM).
-- Secure handling of imported files (size and type limits, no execution of content).
-- Minimal collection of personal and sensitive information.
-- Clear separation between confirmed information, inferred matches and unknowns.
-- Automated tests for important security and data-integrity requirements.
-- Authentication, authorisation and an audit log if a deployed version is demonstrated (see stretch scope).
-
-Development and demonstrations should use synthetic data wherever possible. Real application credentials, access tokens and unnecessary personal information must not be committed to the repository.
-
----
-
-## 11. Technology stack
-
-| Component | Technology | Priority |
-|---|---|---|
-| Language | Python | Core |
-| Web framework | FastAPI | Core |
-| Database | SQLite for local development | Core |
-| Database access | SQLAlchemy | Core |
-| Data validation | Pydantic | Core |
-| Interface | Server-rendered HTML with Jinja2 | Core |
-| Testing | pytest | Core |
-| Version control | Git and GitHub | Core |
-| Interactivity | HTMX | Optional |
-| Continuous integration | GitHub Actions | Optional |
-
-The stack may change as the design is tested. The priority is to keep the first version understandable, testable and practical to run locally. If time runs short, drop the optional items first.
-
----
-
-## 12. Development roadmap
-
-Each phase should leave something that runs.
-
-### Phase 1: Research and validation
-- Finish the feature and workflow comparison of existing projects.
-- Examine CISO Assistant's third-party-risk module in more depth.
-- Interview a small number of potential users about how they track vendors today.
-- Refine the research question and MVP scope.
-
-### Phase 2: Data model and inventory
-- Create the database and the vendor and application tables.
-- Build add, edit and list screens for vendors and applications.
-- Add the "unassigned applications" view.
-
-### Phase 3: Import and matching
-- Implement CSV validation and import with an import record.
-- Match applications to vendors by domain.
-- Handle duplicates and unmatched applications.
-
-### Phase 4: Assurance and prioritisation
-- Add operator-agreement and review fields and the overdue calculation.
-- Implement scoring with unknown handling and the completeness figure.
-- Test behaviour against synthetic scenarios.
-
-### Phase 5: Dashboard
-- Build counts by level and lists of missing agreements, overdue reviews, unassigned applications and incomplete vendors.
-
-### Phase 6: Evaluation and documentation
-- Run the automated tests and a small usability test.
-- Document limitations, results and lessons learned.
-- Publish the code and contribution guidance.
-
----
-
-## 13. Evaluation criteria
-
-The prototype will be evaluated against practical, testable outcomes. The targets below are starting points and may be adjusted.
-
-- A valid CSV of about 20 synthetic applications imports without errors, and at least 90% are matched to the correct vendor by domain.
-- Unmatched applications remain visible for review.
-- Vendor and application relationships are represented consistently.
-- Risk scores are reproducible, and their contributing factors are visible.
-- A vendor that handles personal information with no signed agreement always scores at least 35.
-- Unknown information is flagged and not treated as evidence of safety.
-- Adding an agreement, an owner or a review changes the score and level in the expected direction.
-- Missing agreement records and overdue reviews are identified correctly.
-- Input validation and database operations pass their tests.
-- Three people without a cybersecurity background complete the key tasks (add a vendor, import apps, find overdue reviews) in a usability test.
-
-The project will report what testing demonstrates and will not assume that the tool improves security simply because it produces a score.
+These results come from a small synthetic data set. Real files will be messier.
 
 ---
 
 ## 14. Limitations
 
-- The need for this particular workflow has not yet been validated through user interviews.
-- Existing tools may already satisfy some or all of the proposed requirements.
-- CISO Assistant was reviewed at feature-list level only, and commercial vendor-risk platforms were not researched.
+- The need for this workflow has **not yet been validated** through user interviews or a usability test.
+- Existing tools may already satisfy some of the proposed requirements. CISO Assistant was reviewed at feature-list level only, and commercial vendor-risk platforms were not researched.
 - The target industries and users are assumptions.
-- The risk-scoring weights and thresholds are provisional and have not been validated against real incidents.
-- Imported application inventories may be incomplete or out of date.
-- Application-to-vendor matching may be ambiguous and require human confirmation.
-- Recording an agreement does not establish that the agreement is legally adequate.
-- The prototype will not independently establish POPIA compliance.
-- Aperio and open-SSPM were reviewed from snapshots and may change.
+- The scoring weights and thresholds are provisional and not validated against real incidents.
+- Imported application lists may be incomplete or out of date, and matching a domain to a vendor can be ambiguous, which is why unclear cases stay unassigned.
+- Two applications with the same name, domain and source are treated as one.
+- Only CSV import exists. There is no direct Google Workspace or Microsoft 365 connection.
+- Recording an agreement does not show it is legally adequate, and the tool does not establish POPIA compliance.
+- A vendor reviewed once with no next review date is not counted as overdue.
+- The app is single-user with no login (see section 12).
+- Aperio and open-SSPM were reviewed from snapshots and may have changed.
 
 ---
 
 ## 15. Contributing and licence
 
-VulaTrust is intended to be developed as an open-source learning and portfolio project.
-
-Potential contributions:
-
-- Bug reports and reproducible test cases.
-- Improvements to CSV validation and application matching.
-- Additional synthetic test scenarios.
-- Documentation and usability improvements.
-- Security-focused code review.
-
-Released under the MIT licence. See the `LICENSE` file once the repository is established.
+Contributions are welcome: see [`CONTRIBUTING.md`](CONTRIBUTING.md). Use synthetic data only. Released under the MIT licence (see `LICENSE`).
 
 ---
 
@@ -418,16 +307,12 @@ VulaTrust is a research and software-development project. It is not legal advice
 
 ## 17. References
 
-- Aperio: https://github.com/writer/aperio
-- open-SSPM: https://github.com/open-sspm/open-sspm
-- CISO Assistant Community Edition: https://github.com/intuitem/ciso-assistant-community
-- Information Regulator, Dis-Chem enforcement notice: https://inforegulator.org.za/wp-content/uploads/2020/07/DIS-CHEM-ENFORCEMENT-NOTICE.pdf
-- Fasken, "Beware of the Operator Contract" (POPIA s21): https://fasken.com/en/knowledge/2023/09/beware-of-the-operator-contract-a-necessity-for-popia-compliance
-- CMS, "Data breaches: prevention is better than cure" (POPIA s19 and operators): https://cms.law/en/zaf/publication/data-breaches-prevention-is-better-than-cure
-- Michalsons, "Does someone else process your personal information?": https://www.michalsons.com/focus-areas/privacy-and-data-protection/does-someone-else-process-your-personal-information
-- Information Regulator of South Africa: https://inforegulator.org.za/
-- Protection of Personal Information Act 4 of 2013: https://www.gov.za/documents/protection-personal-information-act
-
----
-
-*VulaTrust is being developed incrementally. The research, prototype and evaluation will determine which proposed features are useful enough to keep.*
+- Aperio: <https://github.com/writer/aperio>
+- open-SSPM: <https://github.com/open-sspm/open-sspm>
+- CISO Assistant Community Edition: <https://github.com/intuitem/ciso-assistant-community>
+- Information Regulator, Dis-Chem enforcement notice: <https://inforegulator.org.za/wp-content/uploads/2020/07/DIS-CHEM-ENFORCEMENT-NOTICE.pdf>
+- Fasken, "Beware of the Operator Contract" (POPIA s21): <https://fasken.com/en/knowledge/2023/09/beware-of-the-operator-contract-a-necessity-for-popia-compliance>
+- CMS, "Data breaches: prevention is better than cure" (POPIA s19 and operators): <https://cms.law/en/zaf/publication/data-breaches-prevention-is-better-than-cure>
+- Michalsons, "Does someone else process your personal information?": <https://www.michalsons.com/focus-areas/privacy-and-data-protection/does-someone-else-process-your-personal-information>
+- Information Regulator of South Africa: <https://inforegulator.org.za/>
+- Protection of Personal Information Act 4 of 2013: <https://www.gov.za/documents/protection-personal-information-act>

@@ -3,6 +3,7 @@
 {% block content %}
 <h2>Vendors</h2>
 {% if message %}<p class="banner">{{ message }}</p>{% endif %}
+{% if level %}<p>Showing <strong>{{ level }}</strong> vendors only. <a href="/vendors">Show all vendors</a></p>{% endif %}
 <p><a class="button" href="/vendors/new">Add vendor</a></p>
 {% if vendors %}
 <table>
@@ -34,6 +35,6 @@
   </tbody>
 </table>
 {% else %}
-<p>No vendors yet. Add your first vendor to get started.</p>
+{% if level %}<p>No vendors are at this level.</p>{% else %}<p>No vendors yet. Add your first vendor to get started.</p>{% endif %}
 {% endif %}
 {% endblock %}

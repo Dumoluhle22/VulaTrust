@@ -5,6 +5,7 @@
 <h2>{{ title }}</h2>
 {% if errors %}<p class="error">Please fix the problems marked below.</p>{% endif %}
 <form method="post" action="{{ action }}">
+  {% include "_csrf.html" %}
   {{ text_field("name", "Application name", values, errors, required=True) }}
   {{ select_field("vendor_id", "Vendor", vendor_options, values, errors, help="Leave as None if you do not know the vendor yet. The application will appear as unassigned.") }}
   {{ select_field("source", "Where did you find it?", SOURCE_OPTIONS, values, errors) }}
