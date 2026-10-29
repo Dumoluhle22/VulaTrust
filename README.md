@@ -9,6 +9,7 @@ VulaTrust is an open-source cybersecurity tool for small and medium-sized South 
 > **Project status:** working prototype. The core features below are built and tested. User interviews and the usability test are still to be completed (see [Limitations](#14-limitations)). The tool has no login, so run it on your own computer only.
 
 ---
+WeThinkCode verification code: WTC-TQLN7PS4
 
 ## Table of contents
 
