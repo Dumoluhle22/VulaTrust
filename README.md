@@ -1,6 +1,6 @@
 # VulaTrust
 
-## Open-Source SaaS Discovery & Vendor Assurance for South African SMEs
+### Open-Source SaaS Discovery & Vendor Assurance for South African SMEs
 
 **Know which third-party apps your business uses, what information they may access, and which vendor records need attention.**
 
@@ -70,7 +70,7 @@ VulaTrust helps organise the relevant records and follow-up actions. **It is not
 ## 3. Who is affected
 
 | Group | How they are affected |
-| --- | --- |
+|---|---|
 | **Business owners and directors** | Accountable under POPIA. In many companies the CEO is automatically the information officer, so they carry the risk without necessarily having a security background. |
 | **Office managers and IT contractors** | Often the people who end up tracking vendors, with little time and no specialist tools. |
 | **Employees** | Connect applications to company accounts to get work done, often without knowing what access they grant. |
@@ -101,26 +101,28 @@ The tool itself is industry-neutral. The segments mainly decide which examples a
 VulaTrust does **not** claim that vendor-risk management is missing from the open-source world. Existing projects cover parts of the problem.
 
 | Project | Focus | Verified how |
-| --- | --- | --- |
+|---|---|---|
 | [Aperio](https://github.com/writer/aperio) | SaaS security posture, OAuth app discovery, findings sent to a SIEM | README, database schema and a search of the full source |
 | [open-SSPM](https://github.com/open-sspm/open-sspm) | "Who has access to what": identities, permissions, discovered apps, review workflow | README, database schema and a search of the full source |
-| [CISO Assistant Community Edition](https://github.com/intuitem/ciso-assistant-community) | Broad governance, risk and compliance, including third-party risk and contracts | README and feature list only |
+| [CISO Assistant Community Edition](https://github.com/intuitem/ciso-assistant-community) | Broad governance, risk and compliance, including vendor ("entity") records, contracts and questionnaire-based assessments | Official documentation only (guide, glossary, import and deployment pages), not its code or a running instance |
 
 Searching Aperio's and open-SSPM's schemas and code for vendor-assurance terms (SOC 2, ISO 27001, questionnaires, data processing agreements, data residency, POPIA, "vendor risk") found nothing relevant. Details are in [`docs/related-work.md`](docs/related-work.md).
 
-| Capability | Aperio | open-SSPM | VulaTrust |
-| --- | --- | --- | --- |
-| Discovers third-party apps | Yes (OAuth) | Yes (SSO and OAuth) | Via CSV import |
-| App-level risk score | Yes | Yes | Per vendor, using app data |
-| First-class vendor record | No | Text label only | Yes |
-| Several apps grouped under one vendor | No | No | Yes |
-| Operator-agreement tracking (POPIA s21) | No | No | Yes |
-| Hosting location per vendor | No | No | Yes |
-| Vendor-level risk score | No | No | Yes |
-| Review-due tracking per vendor | No | App review date only | Yes |
-| Built for non-security staff | No (SIEM-centred) | No (identity-centred) | Intended, not yet tested with users |
+| Capability | Aperio | open-SSPM | CISO Assistant (from its docs) | VulaTrust |
+|---|---|---|---|---|
+| Discovers third-party apps | Yes (OAuth) | Yes (SSO and OAuth) | Not found | Via CSV import |
+| App-level risk score | Yes | Yes | Not found | Per vendor, using app data |
+| First-class vendor record | No | Text label only | Yes (entities) | Yes |
+| Several apps under one vendor | No | No | Yes (an entity has solutions) | Yes |
+| Operator-agreement tracking (POPIA s21) | No | No | Contracts exist; operator-agreement status not found | Yes |
+| Hosting location per vendor | No | No | Not found | Yes |
+| Vendor-level risk score | No | No | Analyst opinion after a questionnaire; automatic explained score not found | Yes |
+| Review-due tracking per vendor | No | App review date only | Not found | Yes |
+| Built for non-security staff | No (SIEM-centred) | No (identity-centred) | No (GRC platform; Docker or Kubernetes, 8 GB of RAM suggested) | Intended, not yet tested with users |
 
-**Honest positioning.** Both SSPM tools find and govern applications but never answer "which vendor is this, and do we have the right agreement?". General GRC tools such as CISO Assistant cover vendors but are built for dedicated security teams. VulaTrust tries to join discovery to a simple vendor register for a small business under POPIA. Whether that is worth having is what the research and usability testing are meant to show.
+"Not found" means it was not found in what was read, which is weaker than "does not exist".
+
+**Honest positioning.** The two SSPM tools find and govern applications but never answer "which vendor is this, and do we have the right agreement?". CISO Assistant does model vendors (entities, their products and services, contracts) and runs questionnaire-based vendor assessments with evidence, but as a general governance, risk and compliance platform for security and compliance teams. It needs Docker or Kubernetes and its documentation suggests at least 8 GB of RAM. As far as its documentation shows, it does not discover applications, match them to vendors, track POPIA operator-agreement status or hosting location, or give an automatic, explained vendor score. VulaTrust's bet is a lightweight register fed by discovery for a small business under POPIA. Whether that is worth having is what the research and usability testing are meant to show.
 
 **Versus a spreadsheet.** A spreadsheet is the realistic alternative. VulaTrust's possible advantages are that an import fills the register (so applications nobody remembered to list appear), and that scores, overdue reviews and priorities are calculated and explained instead of relying on memory.
 
@@ -152,7 +154,7 @@ python -m app.seed                 # load 8 synthetic sample vendors
 python -m uvicorn app.main:app --reload
 ```
 
-Open <http://127.0.0.1:8000>, then go to **Import** and upload `sample_data/apps.csv`. The expected results are listed in [`sample_data/README.md`](sample_data/README.md), and a 10-minute walkthrough is in [`docs/demo-script.md`](docs/demo-script.md).
+Open http://127.0.0.1:8000, then go to **Import** and upload `sample_data/apps.csv`. The expected results are listed in [`sample_data/README.md`](sample_data/README.md), and a 10-minute walkthrough is in [`docs/demo-script.md`](docs/demo-script.md).
 
 ---
 
@@ -161,7 +163,7 @@ Open <http://127.0.0.1:8000>, then go to **Import** and upload `sample_data/apps
 Each vendor gets a score from 0 to 100 and a level: **High** (70 or more), **Medium** (40 to 69) or **Low** (below 40).
 
 | Factor | Points |
-| --- | --- |
+|---|---|
 | Handles personal information and has no signed operator agreement | 35 |
 | Has an application with broad (privileged) access | 20 |
 | No owner assigned | 15 |
@@ -179,8 +181,7 @@ The weights are a reasoned starting point and have not been validated against re
 
 ## 9. Scope
 
-### Built
-
+**Built**
 - Vendor and application registers with validation and safe defaults
 - CSV check, preview, confirm, history, matching and re-import
 - Operator-agreement and review-date rules
@@ -188,14 +189,12 @@ The weights are a reasoned starting point and have not been validated against re
 - Security protections (see section 12)
 - Synthetic sample data with documented expected results, and automated tests
 
-### Not built (possible future work)
-
+**Not built (possible future work)**
 - Login and roles, and an audit log
 - Direct import from Google Workspace or Microsoft 365
 - CSV or PDF export, review reminders, follow-up actions, match-confidence indicators
 
-### Out of scope
-
+**Out of scope**
 - Real-time monitoring or SIEM functions
 - Scanning vendors from outside, or breach monitoring
 - Automated legal interpretation of contracts
@@ -208,7 +207,7 @@ The weights are a reasoned starting point and have not been validated against re
 ## 10. Technology
 
 | Component | Technology |
-| --- | --- |
+|---|---|
 | Language | Python 3.10+ |
 | Web framework | FastAPI with Uvicorn |
 | Database | SQLite through SQLAlchemy |
@@ -221,7 +220,7 @@ The weights are a reasoned starting point and have not been validated against re
 
 ## 11. Project layout and documentation
 
-```text
+```
 app/            application code (see docs/data-model.md for the module map)
 tests/          automated tests
 sample_data/    synthetic vendors and applications, with expected results
@@ -229,7 +228,7 @@ docs/           documentation
 ```
 
 | Document | What it covers |
-| --- | --- |
+|---|---|
 | [`docs/setup.md`](docs/setup.md) | Install, run, reset, troubleshoot |
 | [`docs/user-guide.md`](docs/user-guide.md) | How to use each screen |
 | [`docs/data-model.md`](docs/data-model.md) | Tables, fields and the code layout |
@@ -261,7 +260,7 @@ VulaTrust stores business records, so it protects them where it can. Highlights:
 **333 automated tests pass, with 98% line coverage of `app/`.** Details are in [`docs/testing.md`](docs/testing.md).
 
 | Criterion | Result |
-| --- | --- |
+|---|---|
 | A CSV of about 20 synthetic applications imports without errors | Met. 23 rows read, 16 imported, 1 duplicate and 6 invalid rows reported |
 | At least 90% of applications that belong to a registered vendor match it by domain | Met, 11 of 11, on the synthetic sample |
 | Unmatched applications stay visible | Met |
@@ -280,7 +279,7 @@ These results come from a small synthetic data set. Real files will be messier.
 ## 14. Limitations
 
 - The need for this workflow has **not yet been validated** through user interviews or a usability test.
-- Existing tools may already satisfy some of the proposed requirements. CISO Assistant was reviewed at feature-list level only, and commercial vendor-risk platforms were not researched.
+- Existing tools may already satisfy some of the proposed requirements. CISO Assistant was reviewed from its official documentation only, not its code or a running instance, and commercial vendor-risk platforms were not researched.
 - The target industries and users are assumptions.
 - The scoring weights and thresholds are provisional and not validated against real incidents.
 - Imported application lists may be incomplete or out of date, and matching a domain to a vendor can be ambiguous, which is why unclear cases stay unassigned.
@@ -307,12 +306,12 @@ VulaTrust is a research and software-development project. It is not legal advice
 
 ## 17. References
 
-- Aperio: <https://github.com/writer/aperio>
-- open-SSPM: <https://github.com/open-sspm/open-sspm>
-- CISO Assistant Community Edition: <https://github.com/intuitem/ciso-assistant-community>
-- Information Regulator, Dis-Chem enforcement notice: <https://inforegulator.org.za/wp-content/uploads/2020/07/DIS-CHEM-ENFORCEMENT-NOTICE.pdf>
-- Fasken, "Beware of the Operator Contract" (POPIA s21): <https://fasken.com/en/knowledge/2023/09/beware-of-the-operator-contract-a-necessity-for-popia-compliance>
-- CMS, "Data breaches: prevention is better than cure" (POPIA s19 and operators): <https://cms.law/en/zaf/publication/data-breaches-prevention-is-better-than-cure>
-- Michalsons, "Does someone else process your personal information?": <https://www.michalsons.com/focus-areas/privacy-and-data-protection/does-someone-else-process-your-personal-information>
-- Information Regulator of South Africa: <https://inforegulator.org.za/>
-- Protection of Personal Information Act 4 of 2013: <https://www.gov.za/documents/protection-personal-information-act>
+- Aperio: https://github.com/writer/aperio
+- open-SSPM: https://github.com/open-sspm/open-sspm
+- CISO Assistant Community Edition: https://github.com/intuitem/ciso-assistant-community
+- Information Regulator, Dis-Chem enforcement notice: https://inforegulator.org.za/wp-content/uploads/2020/07/DIS-CHEM-ENFORCEMENT-NOTICE.pdf
+- Fasken, "Beware of the Operator Contract" (POPIA s21): https://fasken.com/en/knowledge/2023/09/beware-of-the-operator-contract-a-necessity-for-popia-compliance
+- CMS, "Data breaches: prevention is better than cure" (POPIA s19 and operators): https://cms.law/en/zaf/publication/data-breaches-prevention-is-better-than-cure
+- Michalsons, "Does someone else process your personal information?": https://www.michalsons.com/focus-areas/privacy-and-data-protection/does-someone-else-process-your-personal-information
+- Information Regulator of South Africa: https://inforegulator.org.za/
+- Protection of Personal Information Act 4 of 2013: https://www.gov.za/documents/protection-personal-information-act
